@@ -23,13 +23,9 @@ class backupninja::server {
     mode => 0710, owner => root, group => "backupninjas"
   }
 
-  if $nagios_server {
+  if $use_nagios {
 
-    if !defined(Package["nsca"]) {
-      package { "nsca":
-        ensure => installed;
-      }
-    }
+    include nagios::nsca::client
     
     file { "/usr/local/bin/checkbackups":
       ensure => "present",
@@ -100,9 +96,9 @@ class backupninja::server {
       default => $nagios2_description,
     }
 
-    if $nagios_server {
+    if $use_nagios {
       # configure a passive service check for backups
-      nagios2::passive_service { "backups-${name}": nagios2_host_name => $real_host, nagios2_description => $real_nagios2_description, servicegroups => "backups" }
+      nagios::service::passive { $nagios2_description: }
     }
     
     if !defined(File["$real_dir"]) {
