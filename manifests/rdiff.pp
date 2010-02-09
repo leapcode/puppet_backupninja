@@ -38,10 +38,13 @@ define backupninja::rdiff(
       }
 
       $real_home = $home ? {
-        false => "/home/${user}-${name}",
+        false => $backupdir ? {
+            '' => "/backup/${fqdn}",
+            default => "${backupdir}/${fqdn}",
+            },
         default => $home,
       }
-      $directory = "$real_home/rdiff-backup/"
+      $directory = "${real_home}/rdiff-backup/"
 
       backupninja::server::sandbox
       {
