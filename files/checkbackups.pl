@@ -61,7 +61,7 @@ if (defined($opt_o)) {
 	@hosts=qx{hostname -f};
 } else {
 	# XXX: this should be a complete backup registry instead
-	@hosts=qx{ls $backupdir};
+	@hosts=qx{ls $backupdir | grep -v lost+found};
 }
 
 chdir($backupdir);
