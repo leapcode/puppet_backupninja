@@ -139,15 +139,17 @@ class backupninja::server {
             }
 	  }
 	  default: {
-	    @@ssh_authorized_key{ $real_user:
-	      type => $keytype,
-              key => $key,
-	      user => $real_user,
-	      target => "${real_ssh_dir}/${real_authorized_keys_file}",
-       	      tag => "$real_backuptag",
-	      require => User[$real_user],
-            }
-          }
+              if !defined(Ssh_autorized_key["$real_user"]) {
+                @@ssh_authorized_key{ "$real_user":
+                  type    => $keytype,
+                  key     => $key,
+                  user    => $real_user,
+                  target  => "${real_ssh_dir}/${real_authorized_keys_file}",
+                  tag     => "$real_backuptag",
+                  require => User[$real_user],
+                }
+              }
+     }
 	}
         case $uid {
           false: {
@@ -160,7 +162,7 @@ class backupninja::server {
                 managehome => true,
                 shell   => "/bin/sh",
                 password => '*',
-	        require => Group['backupninjas'],
+                require => Group['backupninjas'],
                 tag => "$real_backuptag"
               }
             }
@@ -176,7 +178,7 @@ class backupninja::server {
                 managehome => true,
                 shell   => "/bin/sh",
                 password => '*',
-	        require => Group['backupninjas'],
+                require => Group['backupninjas'],
                 tag => "$real_backuptag"
               }
             }
