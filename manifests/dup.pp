@@ -14,7 +14,7 @@
 #      find the correct file to remove).
 #
 #   options, nicelevel, testconnect, tmpdir, sign, encryptkey, signkey,
-#   password, include, exclude, vsinclude, incremental, keep, bandwithlimit,
+#   password, include, exclude, vsinclude, incremental, keep, bandwidthlimit,
 #   sshoptions, destdir, desthost, desuser:
 #
 #      As defined in the backupninja documentation.  The options will be
@@ -72,7 +72,7 @@ define backupninja::duplicity( $order  = 90,
                                # [dest]
                                $incremental   = "yes",
                                $keep          = false,
-                               $bandwithlimit = false,
+                               $bandwidthlimit = false,
                                $sshoptions    = false,
                                $destdir       = false,
                                $desthost      = false,
