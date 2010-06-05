@@ -34,7 +34,7 @@ define backupninja::rdiff(
     'remote': {
       case $host { false: { err("need to define a host for remote backups!") } }
       $real_backuptag = $backuptag ? {
-          false => "backupninja-$host",
+          false => "backupninja-$fqdn",
           default => $backuptag
       }
 
