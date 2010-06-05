@@ -54,7 +54,7 @@ class backupninja::server {
   }
 
   # collect all resources from hosted backups
-  Backupninja_server_realize <| tag == "$real_backupserver_tag" |>
+  Backupninja_server_realize <<| tag == "$real_backupserver_tag" |>>
 
   if !defined(Package["rsync"]) {
     if $rsync_ensure_version == '' { $rsync_ensure_version = 'installed' }
