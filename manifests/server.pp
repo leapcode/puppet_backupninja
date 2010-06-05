@@ -1,3 +1,9 @@
+define backupninja_server_realize($host) {
+  User               <<| tag == "backupninja-$host" |>>
+  File               <<| tag == "backupninja-$host" |>>
+  Ssh_authorized_key <<| tag == "backupninja-$host" |>>
+}
+
 class backupninja::server {
 
   $real_backupdir = $backupdir ? {
@@ -46,9 +52,8 @@ class backupninja::server {
     }
   }
 
-  User <<| tag == "backupninja-$real_backupserver_tag" |>>
-  File <<| tag == "backupninja-$real_backupserver_tag" |>>
-  Ssh_authorized_key <<| tag == "backupninja-$real_backupserver_tag" |>>
+  # collect all resources from hosted backups
+  Backupninja_server_realize <| tag == "$real_backupserver_tag" |>
 
   if !defined(Package["rsync"]) {
     if $rsync_ensure_version == '' { $rsync_ensure_version = 'installed' }
@@ -91,7 +96,7 @@ class backupninja::server {
       default => $authorized_keys_file,
     }
     $real_backuptag = $backuptag ? {
-      false => "backupninja-$real_host",
+      false => "backupninja-$fqdn",
       default => $backuptag,
     }
 
@@ -105,16 +110,16 @@ class backupninja::server {
       nagios2::passive_service { "backups-${name}": nagios2_host_name => $real_host, nagios2_description => $real_nagios2_description, servicegroups => "backups" }
     }
     
+    @@backupninja_server_realize { "${fqdn}-${real_host}":
+      host => $fqdn,
+      tag  => $real_host,
+    }
+
     if !defined(File["$real_dir"]) {
       @@file { "$real_dir":
         ensure => directory,
         mode => 0750, owner => $real_user, group => 0,
         tag => "$real_backuptag",
-      }
-    }
-    else {
-      File["$real_dir"] {
-        tag +> "$real_backuptag",
       }
     }
     case $installuser {
@@ -127,11 +132,6 @@ class backupninja::server {
                 mode => 0700, owner => $real_user, group => 0,
                 require => [User[$real_user], File["$real_dir"]],
                 tag => "$real_backuptag",
-              }
-            }
-            else {
-              File["$real_ssh_dir"] {
-                tag +> "$real_backuptag",
               }
             }
           }
@@ -147,11 +147,6 @@ class backupninja::server {
                 tag => "$real_backuptag",
               }
             }
-            else {
-              File["${real_ssh_dir}/${real_authorized_keys_file}"] {
-                tag +> "$real_backuptag",
-              }
-            }
 	  }
 	  default: {
               if !defined(Ssh_autorized_key["$real_user"]) {
@@ -162,11 +157,6 @@ class backupninja::server {
                   target  => "${real_ssh_dir}/${real_authorized_keys_file}",
                   tag     => "$real_backuptag",
                   require => User[$real_user],
-                }
-              }
-              else {
-               Ssh_authorized_key["$real_user"] {
-                  tag +> "$real_backuptag",
                 }
               }
      }
@@ -186,11 +176,6 @@ class backupninja::server {
                 tag => "$real_backuptag"
               }
             }
-            else {
-              User["$real_user"] {
-                tag +> "$real_backuptag",
-              }
-            }
           }
           default: {
             if !defined(User["$real_user"]) {
@@ -205,11 +190,6 @@ class backupninja::server {
                 password => '*',
                 require => Group['backupninjas'],
                 tag => "$real_backuptag"
-              }
-            }
-            else {
-              User["$real_user"] {
-                tag +> "$real_backuptag",
               }
             }
           }
