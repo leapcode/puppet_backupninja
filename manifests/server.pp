@@ -1,3 +1,4 @@
+# this define realizes all needed resources for a hosted backup
 define backupninja_server_realize($host) {
   User               <<| tag == "backupninja-$host" |>>
   File               <<| tag == "backupninja-$host" |>>
@@ -110,9 +111,12 @@ class backupninja::server {
       nagios2::passive_service { "backups-${name}": nagios2_host_name => $real_host, nagios2_description => $real_nagios2_description, servicegroups => "backups" }
     }
     
-    @@backupninja_server_realize { "${fqdn}-${real_host}":
-      host => $fqdn,
-      tag  => $real_host,
+    if !defined(Backupninja_server_realize["${fqdn}-${real_host}"]) {
+      # this defines just maps that $real_host host backups for $fdqn
+      @@backupninja_server_realize { "${fqdn}-${real_host}":
+        host => $fqdn,
+        tag  => $real_host,
+      }
     }
 
     if !defined(File["$real_dir"]) {
