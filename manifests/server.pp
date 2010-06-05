@@ -105,31 +105,34 @@ class backupninja::server {
       nagios2::passive_service { "backups-${name}": nagios2_host_name => $real_host, nagios2_description => $real_nagios2_description, servicegroups => "backups" }
     }
     
-    if !defined(File["$real_dir"]) {
-      @@file { "$real_dir":
+    if !defined(File["$real_backuptag-$real_dir"]) {
+      @@file { "$real_backuptag-$real_dir":
+        path   => "$real_dir",
         ensure => directory,
-        mode => 0750, owner => $real_user, group => 0,
-        tag => "$real_backuptag",
+        mode   => 0750, owner => $real_user, group => 0,
+        tag    => "$real_backuptag",
       }
     }
     case $installuser {
       true: {
         case $manage_ssh_dir {
           true: {
-            if !defined(File["$real_ssh_dir"]) {
-              @@file { "${real_ssh_dir}":
-                ensure => directory,
-                mode => 0700, owner => $real_user, group => 0,
+            if !defined(File["$real_backuptag-$real_ssh_dir"]) {
+              @@file { "$real_backuptag-${real_ssh_dir}":
+                path    => "${real_ssh_dir}",
+                ensure  => directory,
+                mode    => 0700, owner => $real_user, group => 0,
                 require => [User[$real_user], File["$real_dir"]],
-                tag => "$real_backuptag",
+                tag     => "$real_backuptag",
               }
             }
           }
         } 
 	case $key {
 	  false: {
-            if !defined(File["${real_ssh_dir}/${real_authorized_keys_file}"]) {
-              @@file { "${real_ssh_dir}/${real_authorized_keys_file}":
+            if !defined(File["$real_backuptag-${real_ssh_dir}/${real_authorized_keys_file}"]) {
+              @@file { "$real_backuptag-${real_ssh_dir}/${real_authorized_keys_file}":
+                path   => "${real_ssh_dir}/${real_authorized_keys_file",
                 ensure => present,
                 mode => 0644, owner => 0, group => 0,
                 source => "$real_backupkeys/${real_user}_id_${keytype}.pub",
@@ -139,8 +142,9 @@ class backupninja::server {
             }
 	  }
 	  default: {
-              if !defined(Ssh_autorized_key["$real_user"]) {
-                @@ssh_authorized_key{ "$real_user":
+              if !defined(Ssh_autorized_key["$real_backuptag-$real_user"]) {
+                @@ssh_authorized_key{ "$real_backuptag-$real_user":
+                  name    => "$real_user",
                   type    => $keytype,
                   key     => $key,
                   user    => $real_user,
@@ -153,8 +157,9 @@ class backupninja::server {
 	}
         case $uid {
           false: {
-            if !defined(User["$real_user"]) {
-              @@user { "$real_user":
+            if !defined(User["$real_backuptag-$real_user"]) {
+              @@user { "$real_backuptag-$real_user":
+                name    => "$real_user",
                 ensure  => "present",
                 gid     => "$gid",
                 comment => "$name backup sandbox",
@@ -168,8 +173,9 @@ class backupninja::server {
             }
           }
           default: {
-            if !defined(User["$real_user"]) {
-              @@user { "$real_user":
+            if !defined(User["$real_backuptag-$real_user"]) {
+              @@user { "$real_backuptag-$real_user":
+                name    => "$real_user",
                 ensure  => "present",
                 uid     => "$uid",
                 gid     => "$gid",
