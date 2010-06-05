@@ -113,7 +113,7 @@ class backupninja::server {
       }
     }
     else {
-      File <| title == "$real_dir" |> {
+      File["$real_dir"] {
         tag +> "$real_backuptag",
       }
     }
@@ -130,7 +130,7 @@ class backupninja::server {
               }
             }
             else {
-              File <| title == "$real_ssh_dir" |> {
+              File["$real_ssh_dir"] {
                 tag +> "$real_backuptag",
               }
             }
@@ -148,7 +148,7 @@ class backupninja::server {
               }
             }
             else {
-              File <| title == "${real_ssh_dir}/${real_authorized_keys_file}" |> {
+              File["${real_ssh_dir}/${real_authorized_keys_file}"] {
                 tag +> "$real_backuptag",
               }
             }
@@ -165,7 +165,7 @@ class backupninja::server {
                 }
               }
               else {
-               Ssh_authorized_key <| title == "$real_user" |> {
+               Ssh_authorized_key["$real_user"] {
                   tag +> "$real_backuptag",
                 }
               }
@@ -187,7 +187,7 @@ class backupninja::server {
               }
             }
             else {
-              User <| title == "$real_user" |> {
+              User["$real_user"] {
                 tag +> "$real_backuptag",
               }
             }
@@ -208,7 +208,7 @@ class backupninja::server {
               }
             }
             else {
-              User <| title == "$real_user" |> {
+              User["$real_user"] {
                 tag +> "$real_backuptag",
               }
             }
