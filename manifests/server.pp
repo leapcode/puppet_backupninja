@@ -171,7 +171,7 @@ class backupninja::server {
               @@user { "$real_user":
                 ensure  => "present",
                 gid     => "$gid",
-                comment => "$name backup sandbox",
+                comment => "$real_user backup sandbox",
                 home    => "$real_dir",
                 managehome => true,
                 shell   => "/bin/sh",
@@ -187,7 +187,7 @@ class backupninja::server {
                 ensure  => "present",
                 uid     => "$uid",
                 gid     => "$gid",
-                comment => "$name backup sandbox",
+                comment => "$real_user backup sandbox",
                 home    => "$real_dir",
                 managehome => true,
                 shell   => "/bin/sh",
