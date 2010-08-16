@@ -1,5 +1,6 @@
 # Run rsync as part of a backupninja run.
 # Based on backupninja::rdiff
+# Right now just local origin and remote destination is supported.
 
 define backupninja::rsync(
   $order = 90, $ensure = present, $user = false, $home = false, $host = false,

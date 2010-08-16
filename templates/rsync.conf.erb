@@ -12,7 +12,7 @@
 end -%>
 
 [source]
-<%- %w{from host port user testconnect include exclude ssh protocol rsync rssync_options exclude_vserver, numericids, compress, bandwidthlimit, remote_rsync, id_file, batch, batchbase, filelist, filelistbase}.each do |v|
+<%- %w{from testconnect include exclude ssh protocol rsync rssync_options exclude_vserver, numericids, compress, bandwidthlimit, remote_rsync, id_file, batch, batchbase, filelist, filelistbase}.each do |v|
     if has_variable?(v) and instance_variable_get("@#{v}").to_s != "false" -%>
 <%= v + ' = ' + instance_variable_get("@#{v}").to_s %>
 <%-
