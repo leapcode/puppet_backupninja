@@ -3,8 +3,8 @@
 
 define backupninja::rsync(
   $order = 90, $ensure = present, $user = false, $home = false, $host = false,
-  $ssh_dir_manage = true, $ssh_dir = false, $authorized_keys_file = false
-  $installuser = true, $installkey = true, $key = false, $backuptag = false
+  $ssh_dir_manage = true, $ssh_dir = false, $authorized_keys_file = false,
+  $installuser = true, $installkey = true, $key = false, $backuptag = false,
   $home = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false,
   $nagios2_description = 'backups', $subfolder = 'rsync',
 
