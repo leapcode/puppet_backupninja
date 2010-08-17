@@ -9,29 +9,31 @@ define backupninja::rsync(
   $home = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false,
   $nagios2_description = 'backups', $subfolder = 'rsync',
 
-  $rm = false, $cp = false, $touch = false, $mv = false, $fsck = false,
-
+  # general
   $log = false, $partition = false, $fscheck = false, $read_only = false,
   $mountpoint = false, $backupdir = false, $format = false, $days = '5',
   $keepdaily = false, $keepweekly = false, $keepmonthly = false, $lockfile = false,
   $nicelevel = 0, $enable_mv_timestamp_bug = false, $tmp = false, $multiconnection = false,
 
-  $from = 'local', $rsync = false, $rsync_options = false,
-  $testconnect = false, $protocol = false, $ssh = false, $port = false,
-  $bandwidthlimit = false, $remote_rsync = false, $id_file = false,
-  $batch = false, $filelist = false, $filelistbase = false,
-
+  # source
+  $from = 'local', $exclude_vserver = false,
   $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
                "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
                "/home/*/gtk-gnutella-downloads" ],
   $include = [ "/var/spool/cron/crontabs", "/var/backups", "/etc", "/root",
                "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
 
-  $exclude_vserver = false, $numericids = false, $compress = false,
+  # dest
+  $dest = 'remote', $testconnect = false, $protocol = false, $ssh = false, $port = false,
+  $bandwidthlimit = false, $remote_rsync = false, $id_file = false,
+  $batch = false, $batchbase = false, $numericids = false, $compress = false,
+  $fakesuper = false,
 
-  $dest = false, $fakesuper = false, $batchname = false,
+  # services
+  $initscripts = false, $service = false,
 
-  $initscripts = false, $service = false)
+  # system
+  $rm = false, $cp = false, $touch = false, $mv = false, $fsck = false)
 {
   include backupninja::client::rsync
 
