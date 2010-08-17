@@ -1,6 +1,5 @@
 # Run rsync as part of a backupninja run.
 # Based on backupninja::rdiff
-# Right now just local origin and remote destination is supported.
 
 define backupninja::rsync(
   $order = 90, $ensure = present, $user = false, $home = false, $host = false,
@@ -9,33 +8,32 @@ define backupninja::rsync(
   $home = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false,
   $nagios2_description = 'backups', $subfolder = 'rsync',
 
-  # general
   $log = false, $partition = false, $fscheck = false, $read_only = false,
   $mountpoint = false, $backupdir = false, $format = false, $days = '5',
   $keepdaily = false, $keepweekly = false, $keepmonthly = false, $lockfile = false,
   $nicelevel = 0, $enable_mv_timestamp_bug = false, $tmp = false, $multiconnection = false,
 
-  # source
-  $from = 'local', $exclude_vserver = false,
+  $exclude_vserver = false,
   $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
                "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
                "/home/*/gtk-gnutella-downloads" ],
   $include = [ "/var/spool/cron/crontabs", "/var/backups", "/etc", "/root",
                "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
 
-  # dest
-  $dest = 'remote', $testconnect = false, $protocol = false, $ssh = false, $port = false,
+  $testconnect = false, $protocol = false, $ssh = false, $port = false,
   $bandwidthlimit = false, $remote_rsync = false, $id_file = false,
   $batch = false, $batchbase = false, $numericids = false, $compress = false,
   $fakesuper = false,
 
-  # services
   $initscripts = false, $service = false,
 
-  # system
   $rm = false, $cp = false, $touch = false, $mv = false, $fsck = false)
 {
   include backupninja::client::rsync
+
+  # Right now just local origin and remote destination is supported.
+  $from = local
+  $dest = remote
 
   case $dest {
     'remote': {
