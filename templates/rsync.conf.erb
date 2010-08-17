@@ -20,7 +20,7 @@ end -%>
 end -%>
 
 [dest]
-<%- %w{dest, testconnect, ssh, protocol, numericids, compress, host, port, user, id_file, bandwidthlimit, remote_rsync, batch, batchbase, fakesuper}.each do |v|
+<%- %w{dest testconnect ssh protocol numericids compress host port user id_file bandwidthlimit remote_rsync batch batchbase fakesuper}.each do |v|
     if has_variable?(v) and instance_variable_get("@#{v}").to_s != "false" -%>
 <%= v + ' = ' + instance_variable_get("@#{v}").to_s %>
 <%-
@@ -28,7 +28,7 @@ end -%>
 end -%>
 
 [services]
-<%- %w{initscripts, service}.each do |v|
+<%- %w{initscripts service}.each do |v|
     if has_variable?(v) and instance_variable_get("@#{v}").to_s != "false" -%>
 <%= v + ' = ' + instance_variable_get("@#{v}").to_s %>
 <%-
@@ -36,7 +36,7 @@ end -%>
 end -%>
 
 [system]
-<%- %w{rm, cp, touch, mv fsck}.each do |v|
+<%- %w{rm cp touch mv fsck}.each do |v|
     if has_variable?(v) and instance_variable_get("@#{v}").to_s != "false" -%>
 <%= v + ' = ' + instance_variable_get("@#{v}").to_s %>
 <%-

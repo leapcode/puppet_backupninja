@@ -9,7 +9,7 @@ define backupninja::rsync(
   $nagios2_description = 'backups', $subfolder = 'rsync',
 
   $log = false, $partition = false, $fscheck = false, $read_only = false,
-  $mountpoint = false, $backupdir = false, $format = false, $days = '5',
+  $mountpoint = false, $backupdir = false, $format = false, $days = false,
   $keepdaily = false, $keepweekly = false, $keepmonthly = false, $lockfile = false,
   $nicelevel = 0, $enable_mv_timestamp_bug = false, $tmp = false, $multiconnection = false,
 
@@ -31,17 +31,17 @@ define backupninja::rsync(
 {
   include backupninja::client::rsync
 
-  # Right now just local origin and remote destination is supported.
-  $from = local
-  $dest = remote
+  # Right now just local origin with remote destination is supported.
+  $from = 'local'
+  $dest = 'remote'
 
   case $dest {
     'remote': {
       case $host { false: { err("need to define a host for remote backups!") } }
 
       $real_backuptag = $backuptag ? {
-          false   => "backupninja-$fqdn",
-          default => $backuptag
+        false   => "backupninja-$fqdn",
+        default => $backuptag,
       }
 
       $real_home = $home ? {
