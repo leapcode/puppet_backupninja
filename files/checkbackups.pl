@@ -44,10 +44,11 @@ our $opt_c = 48 * 60 * 60;
 our $opt_w = 24 * 60 * 60;
 our $opt_v = 0;
 our $opt_o;
+our $opt_s;
 
-if (!getopts('d:c:w:vo')) {
+if (!getopts('d:c:w:s:vo')) {
 	print <<EOF
-Usage: $0 [ -d <backupdir> ] [ -c <threshold> ] [ -w <threshold> ] [ -o ] [ -v ]
+Usage: $0 [ -d <backupdir> ] [ -c <threshold> ] [ -w <threshold> ] [ -o ] [ -s <host> ] [ -v ]
 EOF
 	;
 	exit();
@@ -122,7 +123,16 @@ sub print_status {
     if (!$service) {
         $service = 'backups';
     }
-    printf "$host\t$service\t$state\t$state_msg $message\n";
+    $line = "$host\t$service\t$state\t$state_msg $message\n";
+    if ($opt_s) {
+	$opt_v && print STDERR "sending results to nagios...\n";
+        open(NSCA, "|/usr/sbin/send_nsca -H $opt_s") or die("cannot start send_nsca: $!\n");
+        print NSCA $line;
+        close(NSCA) or warn("could not close send_nsca pipe correctly: $!\n");
+    }
+    if (!$opt_s || $opt_v) {
+        printf $line;
+    }
 }
 
 sub check_flag {
