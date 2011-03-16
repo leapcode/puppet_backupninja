@@ -16,3 +16,8 @@ compress = <%= compress ? 'yes' : 'no' %>
 <% if real_configfile %>
 configfile = <%= real_configfile %>
 <% end %>
+
+<% if nodata %>
+nodata = <% nodata.each do |dbtable| -%><%= dbtable %> <% end -%>
+<% end %>
+

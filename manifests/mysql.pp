@@ -18,7 +18,7 @@ define backupninja::mysql(
   $order = 10, $ensure = present, $user = false, $dbusername = false, $dbpassword = false,
   $dbhost = 'localhost', $databases = 'all', $backupdir = false, $hotcopy = false,
   $sqldump = false, $compress = false, $configfile = true,
-  $vsname = false)
+  $vsname = false, $nodata = false)
 {
   
   $real_configfile = $configfile ? {
