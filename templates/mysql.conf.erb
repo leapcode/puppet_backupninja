@@ -17,7 +17,9 @@ compress = <%= compress ? 'yes' : 'no' %>
 configfile = <%= real_configfile %>
 <% end %>
 
-<% if nodata %>
-nodata = <% nodata.each do |dbtable| -%><%= dbtable %> <% end -%>
-<% end %>
+<% if nodata.is_a? String -%>
+<%= 'nodata = ' + nodata %>
+<% elsif nodata.is_a? Array -%>
+<%= "nodata = " + nodata.map { |i| "#{i}" }.join(" ") %>
+<% end -%>
 
