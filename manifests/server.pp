@@ -174,7 +174,7 @@ class backupninja::server {
                 comment => "$real_user backup sandbox",
                 home    => "$real_dir",
                 managehome => true,
-                shell   => "/bin/sh",
+                shell   => "/bin/bash",
                 password => '*',
                 require => Group['backupninjas'],
                 tag => "$real_backuptag"
@@ -190,7 +190,7 @@ class backupninja::server {
                 comment => "$real_user backup sandbox",
                 home    => "$real_dir",
                 managehome => true,
-                shell   => "/bin/sh",
+                shell   => "/bin/bash",
                 password => '*',
                 require => Group['backupninjas'],
                 tag => "$real_backuptag"
