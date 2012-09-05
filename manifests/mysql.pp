@@ -18,7 +18,7 @@ define backupninja::mysql(
   $order = 10, $ensure = present, $user = false, $dbusername = false, $dbpassword = false,
   $dbhost = 'localhost', $databases = 'all', $backupdir = false, $hotcopy = false,
   $sqldump = false, $compress = false, $configfile = true,
-  $vsname = false)
+  $vsname = false, $sqldumpoptions = '--lock-tables --complete-insert --add-drop-table --quick --quote-names')
 {
   
   $real_configfile = $configfile ? {
