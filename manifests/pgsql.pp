@@ -14,7 +14,7 @@
 #   and compress take true/false rather than yes/no.
 # 
 define backupninja::pgsql(
-  $order = 10, $ensure = present, $databases = 'all', $backupdir = "/var/backup/postgres", $compress = true, $vsname = false)
+  $order = 10, $ensure = present, $databases = 'all', $backupdir = "/var/backups/postgres", $compress = true, $vsname = false)
 {
   
   include backupninja::client::defaults
