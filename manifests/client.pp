@@ -108,7 +108,7 @@ class backupninja::client inherits backupninja::client::defaults {
         }
         if !defined(File["$key_dest_file"]) {
           file { "$key_dest_file":
-            source => "${key_store}/${real_user}_id_${key_type}",
+            source => "${key_store}/${key_dest_name}",
             mode => 0400, owner => $key_owner, group => $key_group,
             require => File["$key_dest"],
           }
