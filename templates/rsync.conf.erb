@@ -12,9 +12,13 @@
 end -%>
 
 [source]
-<%- %w{from include exclude}.each do |v|
-    if has_variable?(v) and instance_variable_get("@#{v}").to_s != "false" -%>
-<%= v + ' = ' + instance_variable_get("@#{v}").to_s %>
+<% unless from.empty? and from.to_s != "false" -%>
+from = <%= from %>
+<% end -%>
+<%- %w{include exclude}.each do |v|
+    if has_variable?(v)
+      instance_variable_get("@#{v}").to_a.each do |parameter| -%>
+<%= v + ' = ' + parameter %>
 <%-
     end
 end -%>
