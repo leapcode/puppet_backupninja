@@ -20,6 +20,7 @@ from = <%= from %>
       instance_variable_get("@#{v}").to_a.each do |parameter| -%>
 <%= v + ' = ' + parameter %>
 <%-
+      end
     end
 end -%>
 
