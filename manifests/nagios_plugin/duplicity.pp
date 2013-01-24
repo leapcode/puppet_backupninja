@@ -25,7 +25,7 @@ class backupninja::nagios_plugin::duplicity {
     command_line => "${::nagios::nrpe::nagios_plugin_dir}/check_backupninja_duplicity"
   }
 
-  nagios::service { 'Backupninja Duplicity $::fqdn':
+  nagios::service { "Backupninja Duplicity $::fqdn":
     use_nrpe              => true,
     check_command         => 'check_backupninja_duplicity',
     nrpe_timeout          => '60',
