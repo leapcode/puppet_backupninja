@@ -22,13 +22,13 @@ class backupninja::nagios_plugin::duplicity {
   }
 
   nagios::nrpe::command { 'check_backupninja_duplicity':
-    command_line => "sudo {::nagios::nrpe::nagios_plugin_dir}/check_backupninja_duplicity.py"
+    command_line => "sudo ${::nagios::nrpe::nagios_plugin_dir}/check_backupninja_duplicity.py"
   }
   sudo::spec {'nrpe_check_backupninja_duplicity':
       ensure    => present,
       users     => 'nagios',
       hosts     => 'ALL',
-      commands  => "sudo {::nagios::nrpe::nagios_plugin_dir}/check_backupninja_duplicity.py";
+      commands  => "sudo ${::nagios::nrpe::nagios_plugin_dir}/check_backupninja_duplicity.py";
   }
 
   nagios::service { "Backupninja Duplicity $::fqdn":
