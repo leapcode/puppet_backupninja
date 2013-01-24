@@ -28,7 +28,7 @@ class backupninja::nagios_plugin::duplicity {
       ensure    => present,
       users     => 'nagios',
       hosts     => 'ALL',
-      commands  => "sudo ${::nagios::nrpe::nagios_plugin_dir}/check_backupninja_duplicity.py";
+      commands  => "NOPASSWD: ${::nagios::nrpe::nagios_plugin_dir}/check_backupninja_duplicity.py";
   }
 
   nagios::service { "Backupninja Duplicity $::fqdn":
