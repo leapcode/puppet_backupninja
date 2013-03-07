@@ -37,12 +37,6 @@ define backupninja::rdiff(
           default => $backuptag
       }
 
-      $real_home = $home ? {
-        false => "/home/${user}-${name}",
-        default => $home,
-      }
-      $directory = "$real_home/rdiff-backup/"
-
       backupninja::server::sandbox
       {
         "${user}-${name}": user => $user, host => $fqdn, dir => $real_home,
@@ -61,6 +55,13 @@ define backupninja::rdiff(
       }
     }
   }
+
+  $real_home = $home ? {
+    false => "/home/${user}-${name}",
+    default => $home,
+  }
+    $directory = "$real_home/rdiff-backup/"
+
   file { "${backupninja::client::defaults::configdir}/${order}_${name}.rdiff":
     ensure => $ensure,
     content => template('backupninja/rdiff.conf.erb'),
