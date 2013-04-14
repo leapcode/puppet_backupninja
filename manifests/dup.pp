@@ -79,7 +79,10 @@ define backupninja::duplicity( $order  = 90,
                                $destuser      = false,
                                # configs to backupninja client
                                $backupkeystore       = false,
+                               $backupkeystorefspath = '',
                                $backupkeytype        = "rsa",
+                               $backupkeydest        = false,
+                               $backupkeydestname    = false,
                                # options to backupninja server sandbox
                                $ssh_dir_manage       = true,
                                $ssh_dir              = false,
@@ -87,6 +90,7 @@ define backupninja::duplicity( $order  = 90,
                                $installuser          = true,
                                $backuptag            = false,
                                # key options
+                               $createkey            = false,
                                $installkey           = true ) {
 
   # the client with configs for this machine
@@ -95,7 +99,7 @@ define backupninja::duplicity( $order  = 90,
   case $desthost { false: { err("need to define a destination host for remote backups!") } }
   case $destdir { false: { err("need to define a destination directory for remote backups!") } }
   case $password { false: { err("a password is necessary either to unlock the GPG key, or for symmetric encryption!") } }
-  
+
   # guarantees there's a configured backup space for this backup
   backupninja::server::sandbox { "${user}-${name}":
     user                 => $destuser,
@@ -109,14 +113,18 @@ define backupninja::duplicity( $order  = 90,
     backupkeys           => $backupkeystore,
     keytype              => $backupkeytype,
   }
-  
+
   # the client's ssh key
   backupninja::client::key { "${destuser}-${name}":
-    user       => $destuser,
-    host       => $desthost,
-    installkey => $installkey,
-    keytype    => $backupkeytype,
-    keystore   => $backupkeystore,
+    user           => $destuser,
+    host           => $desthost,
+    createkey      => $createkey,
+    installkey     => $installkey,
+    keytype        => $backupkeytype,
+    keystore       => $backupkeystore,
+    keystorefspath => $backupkeystorefspath,
+    keydest        => $backupkeydest,
+    keydestname    => $backupkeydestname
   }
 
   # the backupninja rule for this duplicity backup
@@ -129,4 +137,4 @@ define backupninja::duplicity( $order  = 90,
     require => File["${backupninja::client::defaults::configdir}"]
   }
 }
-  
+

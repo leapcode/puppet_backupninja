@@ -1,7 +1,7 @@
 Backupninja Module
 -------------------
 
-This module helps you configure all of your backups with puppet, using 
+This module helps you configure all of your backups with puppet, using
 backupninja!
 
 ! Upgrade notice !
@@ -32,12 +32,12 @@ Configure your backup server
 
 Now you will need to configure a backup server by adding the following
 to your node definition for that server:
-  
+
   include backupninja::server
 
 By configuring a backupninja::server, this module will automatically
 create sandboxed users on the server for each client for their
-backups. 
+backups.
 
 You may also want to set some variables on your backup server, such as:
 
@@ -128,6 +128,33 @@ backupninja::config { conf:
 	reportsuccess => false,
 	reportwarning => true;
 }
+
+
+Automatic creation of ssh-keys for duplicity
+--------------------------------------------
+
+backupninja::duplicity can be used to
+
+- create an ssh keypair for a client
+- place the keypair on the puppetmaster in a given location
+- place the keypair in /root/.ssh on the client
+
+i.e.:
+
+  backupninja::duplicity { "duplicity_${::fqdn}":
+    sshoptions        => "-oIdentityFile=/root/.ssh/backupninja_${::hostname}_id_rsa",
+    desthost          => 'HOST',
+    destdir           => "/var/backup/backupninja/${::fqdn}",
+    destuser          => "backupninja_${::hostname}",
+    encryptkey        => 'KEYID',
+    password          => 'PW',
+    backupkeystore    => 'puppet:///keys',
+    backupkeystorefspath => '/etc/puppet/modules/keys/files',
+    backupkeydestname => "backupninja_${::hostname}_id_rsa",
+    createkey         => true,
+    installkey        => true,
+    ...
+  }
 
 
 Nagios alerts about backup freshness
