@@ -30,7 +30,7 @@ define backupninja::rdiff(
 {
   include backupninja::client::rdiff_backup
 
-  $directory = "$real_home/rdiff-backup/"
+  $directory = "$home/rdiff-backup/"
 
   case $type {
     'remote': {
