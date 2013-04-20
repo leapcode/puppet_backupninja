@@ -16,7 +16,8 @@
 #      directories.
 # 
 define backupninja::rdiff(
-  $order = 90, $ensure = present, $user = false, $home = false, $host = false,
+  $order = 90, $ensure = present, $user = false,
+  $home = "/home/${user}-${name}", $host = false,
   $type = 'local',
   $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
                "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
@@ -28,6 +29,8 @@ define backupninja::rdiff(
   $backuptag = false, $home = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false, $nagios2_description = 'backups')
 {
   include backupninja::client::rdiff_backup
+
+  $directory = "$real_home/rdiff-backup/"
 
   case $type {
     'remote': {
@@ -56,11 +59,6 @@ define backupninja::rdiff(
     }
   }
 
-  $real_home = $home ? {
-    false => "/home/${user}-${name}",
-    default => $home,
-  }
-    $directory = "$real_home/rdiff-backup/"
 
   file { "${backupninja::client::defaults::configdir}/${order}_${name}.rdiff":
     ensure => $ensure,
