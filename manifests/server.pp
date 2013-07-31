@@ -29,7 +29,7 @@ class backupninja::server {
     
     file { "/usr/local/bin/checkbackups":
       ensure => "present",
-      source => "puppet://$servername/backupninja/checkbackups.pl",
+      source => "puppet:///modules/backupninja/checkbackups.pl",
       mode => 0755, owner => root, group => root,
     }
 
