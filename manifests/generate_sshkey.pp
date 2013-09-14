@@ -9,6 +9,13 @@ define backupninja::generate_sshkey(
   $public_type = $public[0]
   $public_key = $public[1]
 
+  file { '/root/.ssh':
+    ensure => directory,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0600';
+  }
+
   # install ssh keypair on client
   file { "/root/.ssh/$ssh_key_name":
     content => $ssh_keys[0],
