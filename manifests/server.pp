@@ -32,6 +32,7 @@ class backupninja::server {
   file { "$real_backupdir":
     ensure => "$real_backupdir_ensure",
     mode => 0710, owner => root, group => "backupninjas"
+    require => File["$real_backupdir_ensure"],
   }
 
   if $nagios_server {
