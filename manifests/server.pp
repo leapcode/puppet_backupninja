@@ -30,7 +30,7 @@ class backupninja::server {
   }
   
   file { "$real_backupdir":
-    ensure => "directory",
+    ensure => "$real_backupdir_ensure",
     mode => 0710, owner => root, group => "backupninjas"
   }
 
