@@ -19,6 +19,10 @@ class backupninja::server {
     '' => $fqdn,
     default => $backupserver_tag
   }
+  $real_backupdir_ensure = $backupdir_ensure ? {
+    '' => "directory",
+    default => $backupdir_ensure,
+  }
   
   group { "backupninjas":
     ensure => "present",
