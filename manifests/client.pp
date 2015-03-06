@@ -46,8 +46,10 @@ class backupninja::client::defaults {
 
 class backupninja::client inherits backupninja::client::defaults {
   define key(
-    $user = false, $host = false, $installkey=false, $keyowner=false,
-    $keygroup=false, $keystore=false, $keytype=false)
+    $user = false, $host = false, $createkey=false, $installkey=false,
+    $keyowner=false, $keygroup=false, $keystore=false, $keystorefspath='',
+    $keytype=false,
+    $keydest=false, $keydestname=false )
   {
     $real_user = $user ? {
       false => $name,
@@ -78,9 +80,23 @@ class backupninja::client inherits backupninja::client::defaults {
     	false => "${backupninja::client::defaults::real_keytype}",
 	default => $keytype,
     }
+    $key_dest = $keydest ? {
+      false   => "${backupninja::client::defaults::real_keydestination}",
+      default => $keydest,
+    }
+    $key_dest_name = $keydestname ? {
+      false => "id_$key_type",
+      default => $keydestname,
+    }
+    $key_dest_file = "${key_dest}/${key_dest_name}"
 
-    $key_dest      = "${backupninja::client::defaults::real_keydestination}"
-    $key_dest_file = "$key_dest/id_$key_type"
+    if $createkey == true {
+      if $keystorefspath == false {
+        err("need to define a destination directory for sshkey creation!")
+      }
+      $ssh_keys = ssh_keygen("${keystorefspath}/${key_dest_name}")
+    }
+      
 
     case $install_key {
       true: {
@@ -92,7 +108,7 @@ class backupninja::client inherits backupninja::client::defaults {
         }
         if !defined(File["$key_dest_file"]) {
           file { "$key_dest_file":
-            source => "${key_store}/${real_user}_id_${key_type}",
+            source => "${key_store}/${key_dest_name}",
             mode => 0400, owner => $key_owner, group => $key_group,
             require => File["$key_dest"],
           }
@@ -109,7 +125,7 @@ class backupninja::client::maildir inherits backupninja::client::defaults {
     package { 'rsync':
       ensure => $rsync_ensure_version,
     }
-  } 
+  }
 }
 
 class backupninja::client::rdiff_backup inherits backupninja::client::defaults {
@@ -150,4 +166,4 @@ class backupninja::client::sys inherits backupninja::client::defaults {
     }
     default: {}
   }
-}  
+}

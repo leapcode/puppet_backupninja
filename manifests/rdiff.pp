@@ -16,7 +16,8 @@
 #      directories.
 # 
 define backupninja::rdiff(
-  $order = 90, $ensure = present, $user = false, $home = false, $host = false,
+  $order = 90, $ensure = present, $user = false,
+  $home = "/home/${user}-${name}", $host = false,
   $type = 'local',
   $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
                "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
@@ -29,6 +30,8 @@ define backupninja::rdiff(
 {
   include backupninja::client::rdiff_backup
 
+  $directory = "$home/rdiff-backup/"
+
   case $type {
     'remote': {
       case $host { false: { err("need to define a host for remote backups!") } }
@@ -37,18 +40,9 @@ define backupninja::rdiff(
           default => $backuptag
       }
 
-      $real_home = $home ? {
-        false => $backupdir ? {
-            '' => "/backup/${fqdn}",
-            default => "${backupdir}/${fqdn}",
-            },
-        default => $home,
-      }
-      $directory = "${real_home}/rdiff-backup/"
-
       backupninja::server::sandbox
       {
-        "${user}-${name}": user => $user, host => $fqdn, dir => $real_home,
+        "${user}-${name}": user => $user, host => $fqdn, dir => $home,
         manage_ssh_dir => $ssh_dir_manage, ssh_dir => $ssh_dir, key => $key,
         authorized_keys_file => $authorized_keys_file, installuser => $installuser,
         backuptag => $real_backuptag, keytype => $backupkeytype, backupkeys => $backupkeystore,
@@ -64,6 +58,8 @@ define backupninja::rdiff(
       }
     }
   }
+
+
   file { "${backupninja::client::defaults::configdir}/${order}_${name}.rdiff":
     ensure => $ensure,
     content => template('backupninja/rdiff.conf.erb'),
