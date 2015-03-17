@@ -4,8 +4,10 @@ vsname = <%= vsname %>
 <% if backupdir %>
 backupdir = <%= backupdir %>
 <% end %>
-<% if databases %>
-databases = <%= databases %>
-<% end %>
+<% if databases.is_a? String -%>
+<%= 'databases = ' + databases %>
+<% elsif databases.is_a? Array -%>
+<%= "databases = " + databases.map { |i| "#{i}" }.join(" ") %>
+<% end -%>
 compress = <%= compress ? 'yes' : 'no' %>
 
