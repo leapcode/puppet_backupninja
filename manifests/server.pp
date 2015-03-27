@@ -8,7 +8,6 @@ define backupninja_server_realize($host) {
 class backupninja::server (
   $backupdir = '/backup',
   $backupdir_ensure = 'directory',
-  $usermanage = 'doit',
   $backupserver_tag = $::fqdn,
   $manage_nagios = false
 ) {
