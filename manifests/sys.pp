@@ -12,8 +12,6 @@
 # 
 define backupninja::sys($order = 30,
                            $ensure = present,
-                           $ensure_debconfutils_version = 'installed',
-                           $ensure_hwinfo_version = 'installed',
                            $parentdir = '/var/backups',
                            $packages = true,
                            $packagesfile = '/var/backups/dpkg-selections.txt',
@@ -30,8 +28,8 @@ define backupninja::sys($order = 30,
   # install client dependencies
   case $operatingsystem {
     debian,ubuntu: {
-      ensure_resource('package', 'debconf-utils', {'ensure' => $ensure_debconfutils_version})
-      ensure_resource('package', 'hwinfo', {'ensure' => $ensure_hwinfo_version})
+      ensure_resource('package', 'debconf-utils', {'ensure' => $backupninja::client::ensure_debconfutils_version})
+      ensure_resource('package', 'hwinfo', {'ensure' => $backupninja::client::ensure_hwinfo_version})
     }
     default: {}
   }

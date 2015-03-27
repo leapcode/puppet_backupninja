@@ -16,7 +16,7 @@
 #      directories.
 # 
 define backupninja::rdiff(
-  $order = 90, $ensure = present, $ensure_rdiffbackup_version = 'installed', 
+  $order = 90, $ensure = present, 
   $user = false, $home = "/home/${user}-${name}", $host = false,
   $type = 'local',
   $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
@@ -30,7 +30,7 @@ define backupninja::rdiff(
   $extras = false, $nagios_description = 'backups')
 {
   # install client dependencies
-  ensure_resource('package', 'rdiff-backup', {'ensure' => $ensure_rdiffbackup_version})
+  ensure_resource('package', 'rdiff-backup', {'ensure' => $backupninja::client::ensure_rdiffbackup_version})
 
   $directory = "$home/rdiff-backup/"
 

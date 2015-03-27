@@ -1,5 +1,10 @@
 class backupninja::client (
   $ensure_backupninja_version = 'installed',
+  $ensure_rsync_version = 'installed',
+  $ensure_rdiffbackup_version = 'installed',
+  $ensure_debconfutils_version = 'installed',
+  $ensure_hwinfo_version = 'installed',
+  $ensure_duplicity_version = 'installed',
   $configdir = '/etc/backup.d',
   $keystore = "${::fileserver}/keys/backupkeys",
   $keystorefspath = false,

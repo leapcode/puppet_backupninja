@@ -39,7 +39,6 @@
 #     testing debian repositories by the time of this writing.
 define backupninja::duplicity( $order  = 90,
                                $ensure = present,
-                               $ensure_duplicity_version = 'installed',
                                # options to the config file
                                $options     = false,
                                $nicelevel   = false,
@@ -98,7 +97,7 @@ define backupninja::duplicity( $order  = 90,
                                $installkey           = true ) {
 
   # install client dependencies
-  ensure_resource('package', 'duplicity', {'ensure' => $ensure_duplicity_version})
+  ensure_resource('package', 'duplicity', {'ensure' => $backupninja::client::ensure_duplicity_version})
 
   case $desthost { false: { err("need to define a destination host for remote backups!") } }
   case $destdir { false: { err("need to define a destination directory for remote backups!") } }
