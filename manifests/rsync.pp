@@ -2,7 +2,8 @@
 # Based on backupninja::rdiff
 
 define backupninja::rsync(
-  $order = 90, $ensure = present, $user = false, $home = false, $host = false,
+  $order = 90, $ensure = present, $ensure_rsync_version = 'installed',
+  $user = false, $home = false, $host = false,
   $ssh_dir_manage = true, $ssh_dir = false, $authorized_keys_file = false,
   $installuser = true, $installkey = true, $key = false, $backuptag = false,
   $home = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false,
@@ -29,7 +30,8 @@ define backupninja::rsync(
 
   $rm = false, $cp = false, $touch = false, $mv = false, $fsck = false)
 {
-  include backupninja::client::rsync
+  # install client dependencies
+  ensure_resource('package', 'rsync', {'ensure' => $ensure_rsync_version})
 
   # Right now just local origin with remote destination is supported.
   $from = 'local'

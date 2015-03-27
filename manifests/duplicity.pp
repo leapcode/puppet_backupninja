@@ -39,6 +39,7 @@
 #     testing debian repositories by the time of this writing.
 define backupninja::duplicity( $order  = 90,
                                $ensure = present,
+                               $ensure_duplicity_version = 'installed',
                                # options to the config file
                                $options     = false,
                                $nicelevel   = false,
@@ -95,6 +96,9 @@ define backupninja::duplicity( $order  = 90,
                                # key options
                                $createkey            = false,
                                $installkey           = true ) {
+
+  # install client dependencies
+  ensure_resource('package', 'duplicity', {'ensure' => $ensure_duplicity_version})
 
   # the client with configs for this machine
   include backupninja::client::duplicity

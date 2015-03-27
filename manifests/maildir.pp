@@ -17,13 +17,15 @@
 #
 # 
 define backupninja::maildir(
-  $order = 99, $ensure = present, $when = 'everyday at 21:00', $srcdir = false,
+  $order = 99, $ensure = present, $ensure_rsync_version = 'installed',
+  $when = 'everyday at 21:00', $srcdir = false,
   $destdir = false, $desthost = false, $destuser = false, $destid_file = false,
   $remove = false, $multiconnection = yes, $keepdaily='4', $keepweekly='2',
   $keepmonthly='2')
 {
-  include backupninja::client::maildir
-                          
+  # install client dependencies
+  ensure_resource('package', 'rsync', {'ensure' => $ensure_rsync_version})
+
   case $srcdir { false: { err("need to define a source directory to backup!") } }
   case $destdir { false: { err("need to define a destination directory to backup!") } }
   case $desthost { false: { err("need to define a destination host for backups!") } }

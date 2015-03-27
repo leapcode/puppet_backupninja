@@ -16,8 +16,8 @@
 #      directories.
 # 
 define backupninja::rdiff(
-  $order = 90, $ensure = present, $user = false,
-  $home = "/home/${user}-${name}", $host = false,
+  $order = 90, $ensure = present, $ensure_rdiffbackup_version = 'installed', 
+  $user = false, $home = "/home/${user}-${name}", $host = false,
   $type = 'local',
   $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
                "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
@@ -28,7 +28,8 @@ define backupninja::rdiff(
   $ssh_dir = false, $authorized_keys_file = false, $installuser = true, $installkey = true, $key = false,
   $backuptag = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false, $nagios2_description = 'backups')
 {
-  include backupninja::client::rdiff_backup
+  # install client dependencies
+  ensure_resource('package', 'rdiff-backup', {'ensure' => $ensure_rdiffbackup_version})
 
   $directory = "$home/rdiff-backup/"
 
