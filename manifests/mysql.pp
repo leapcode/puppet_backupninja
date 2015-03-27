@@ -27,13 +27,12 @@ define backupninja::mysql(
     default => $configfile,
   }
 
-  include backupninja::client::defaults
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.mysql":
+  file { "${backupninja::configdir}/${order}_${name}.mysql":
     ensure => $ensure,
     content => template('backupninja/mysql.conf.erb'),
     owner => root,
     group => root,
     mode => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }

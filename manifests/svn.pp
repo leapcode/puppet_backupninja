@@ -17,13 +17,12 @@ define backupninja::svn($order = 20,
                            $tmp = '/var/backups/svn.tmp',
                            $vsname = false
                           ) {
-                          include backupninja::client::defaults
-	file { "${backupninja::client::defaults::configdir}/${order}_${name}.svn":
+	file { "${backupninja::configdir}/${order}_${name}.svn":
 		ensure => $ensure,
 		content => template('backupninja/svn.conf.erb'),
 		owner => root,
 		group => root,
 		mode => 0600,
-		require => File["${backupninja::client::defaults::configdir}"]
+		require => File["${backupninja::configdir}"]
 	}
 }

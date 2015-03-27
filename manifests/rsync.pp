@@ -6,7 +6,7 @@ define backupninja::rsync(
   $user = false, $home = false, $host = false,
   $ssh_dir_manage = true, $ssh_dir = false, $authorized_keys_file = false,
   $installuser = true, $installkey = true, $key = false, $backuptag = false,
-  $home = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false,
+  $home = false, $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore, $extras = false,
   $nagios2_description = 'backups', $subfolder = 'rsync',
 
   $log = false, $partition = false, $fscheck = false, $read_only = false,
@@ -78,12 +78,12 @@ define backupninja::rsync(
     }
   }
 
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.rsync":
+  file { "${backupninja::configdir}/${order}_${name}.rsync":
     ensure  => $ensure,
     content => template('backupninja/rsync.conf.erb'),
     owner   => root,
     group   => root,
     mode    => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }

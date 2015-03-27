@@ -26,7 +26,8 @@ define backupninja::rdiff(
                "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
   $vsinclude = false, $keep = 30, $sshoptions = false, $options = '--force', $ssh_dir_manage = true,
   $ssh_dir = false, $authorized_keys_file = false, $installuser = true, $installkey = true, $key = false,
-  $backuptag = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false, $nagios2_description = 'backups')
+  $backuptag = false, $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore,
+  $extras = false, $nagios2_description = 'backups')
 {
   # install client dependencies
   ensure_resource('package', 'rdiff-backup', {'ensure' => $ensure_rdiffbackup_version})
@@ -61,13 +62,13 @@ define backupninja::rdiff(
   }
 
 
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.rdiff":
+  file { "${backupninja::configdir}/${order}_${name}.rdiff":
     ensure => $ensure,
     content => template('backupninja/rdiff.conf.erb'),
     owner => root,
     group => root,
     mode => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }
   

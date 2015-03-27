@@ -26,7 +26,6 @@ define backupninja::sys($order = 30,
                            $doluks = false,
                            $dolvm = false
                           ) {
-                          include backupninja::client::defaults
 
   # install client dependencies
   case $operatingsystem {
@@ -37,12 +36,12 @@ define backupninja::sys($order = 30,
     default: {}
   }
 
-	file { "${backupninja::client::defaults::configdir}/${order}_${name}.sys":
+	file { "${backupninja::configdir}/${order}_${name}.sys":
 		ensure => $ensure,
 		content => template('backupninja/sys.conf.erb'),
 		owner => root,
 		group => root,
 		mode => 0600,
-		require => File["${backupninja::client::defaults::configdir}"]
+		require => File["${backupninja::configdir}"]
 	}
 }

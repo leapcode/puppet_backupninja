@@ -1,73 +1,63 @@
-class backupninja::client inherits backupninja::client::defaults {
-  define key(
-    $user = false, $host = false, $createkey=false, $installkey=false,
-    $keyowner=false, $keygroup=false, $keystore=false, $keystorefspath='',
-    $keytype=false,
-    $keydest=false, $keydestname=false )
-  {
-    $real_user = $user ? {
-      false => $name,
-      default => $user
-    }
-    $real_host = $host ? {
-      false => $user,
-      default => $host
-    }
-    $install_key = $installkey ? {
-    	false => "${backupninja::client::defaults::real_keymanage}",
-	default => $installkey,
-    }
-    $key_owner = $keyowner ? {
-    	false => "${backupninja::client::defaults::real_keyowner}",
-	default => $keyowner,
-    }
-    $key_group = $keygroup ? {
-    	false => "${backupninja::client::defaults::real_keygroup}",
-	default => $keygroup,
-    }
-    $key_store = $keystore ? {
-    	false => "${backupninja::client::defaults::real_keystore}",
-	default => $keystore,
-    }
-    $key_type = $keytype ? {
-    	''    => "${backupninja::client::defaults::real_keytype}",
-    	false => "${backupninja::client::defaults::real_keytype}",
-	default => $keytype,
-    }
-    $key_dest = $keydest ? {
-      false   => "${backupninja::client::defaults::real_keydestination}",
-      default => $keydest,
-    }
-    $key_dest_name = $keydestname ? {
-      false => "id_$key_type",
-      default => $keydestname,
-    }
-    $key_dest_file = "${key_dest}/${key_dest_name}"
+class backupninja::client (
+  $ensure_backupninja_version = 'installed',
+  $configdir = '/etc/backup.d',
+  $keystore = "${::fileserver}/keys/backupkeys",
+  $keystorefspath = false,
+  $keytype = 'rsa',
+  $keydest = '/root/.ssh',
+  $keyowner = 0,
+  $keygroup = 0,
+  $keymanage = true,
+) {
 
+  # install client dependencies
+  ensure_resource('package', 'backupninja', {'ensure' => $ensure_backupninja_version})
+
+  # set up backupninja config directory
+  file { $configdir:
+    ensure => directory,
+    mode => 750, owner => 0, group => 0;
+  }
+
+  define key(
+    $user = $name,
+    $createkey = false,
+    $keymanage = $backupninja::keymanage,
+    $keyowner = $backupninja::keyowner,
+    $keygroup = $backupninja::keygroup,
+    $keystore= $backupninja::keystore,
+    $keystorefspath = $backupninja::keystorefspath,
+    $keytype = $backupninja::keytype,
+    $keydest = $backupninja::keydest,
+    $keydestname = "id_${backupninja::keytpe}" )
+  {
+
+    # generate the key
     if $createkey == true {
       if $keystorefspath == false {
         err("need to define a destination directory for sshkey creation!")
       }
-      $ssh_keys = ssh_keygen("${keystorefspath}/${key_dest_name}")
+      $ssh_keys = ssh_keygen("${keystorefspath}/${keydestname}")
     }
-      
 
-    case $install_key {
-      true: {
-        if !defined(File["$key_dest"]) {
-          file { "$key_dest":
-            ensure => directory,
-            mode => 0700, owner => $key_owner, group => $key_group,
-          }
-        }
-        if !defined(File["$key_dest_file"]) {
-          file { "$key_dest_file":
-            source => "${key_store}/${key_dest_name}",
-            mode => 0400, owner => $key_owner, group => $key_group,
-            require => File["$key_dest"],
-          }
-        }
-      }
+    # deploy/manage the key
+    if $keymanage == true {
+      $keydestfile = "${keydest}/${keydestname}"
+      ensure_resource('file', $keydest, {
+          'ensure' => 'directory',
+          'mode'   => '0700',
+          'owner'  => $keyowner,
+          'group'  => $keygroup
+      })
+      ensure_resource('file', $keydestfile, {
+          'ensure'  => 'present',
+          'source'  => "${keystore}/${keydestname}",
+          'mode'    => '0700',
+          'owner'   => $keyowner,
+          'group'   => $keygroup,
+          'require' => 'File["$key_dest"]'
+      })
     }
   }
+
 }
