@@ -10,7 +10,7 @@ class backupninja::server (
   $backupdir_ensure = 'directory',
   $usermanage = 'doit',
   $backupserver_tag = $::fqdn,
-  $manage_nagios = true
+  $manage_nagios = false
 ) {
 
   group { "backupninjas":
