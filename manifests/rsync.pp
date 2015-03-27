@@ -7,7 +7,7 @@ define backupninja::rsync(
   $ssh_dir_manage = true, $ssh_dir = false, $authorized_keys_file = false,
   $installuser = true, $installkey = true, $key = false, $backuptag = false,
   $home = false, $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore, $extras = false,
-  $nagios2_description = 'backups', $subfolder = 'rsync',
+  $nagios_description = 'backups', $subfolder = 'rsync',
 
   $log = false, $partition = false, $fscheck = false, $read_only = false,
   $mountpoint = false, $backupdir = false, $format = false, $days = false,
@@ -65,7 +65,7 @@ define backupninja::rsync(
         backuptag            => $real_backuptag,
         keytype              => $backupkeytype,
         backupkeys           => $backupkeystore,
-        nagios2_description  => $nagios2_description
+        nagios_description  => $nagios_description
       }
      
       backupninja::client::key { "${user}-${name}":
