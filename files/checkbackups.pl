@@ -73,7 +73,7 @@ sub check_rdiff {
         $opt_v && print STDERR "cannot open backup.log\n";
     }
     close(FLAG);
-    ($state, $delta) = check_age($stats[9]);
+    ($state, $delta) = check_age($last_bak);
     print_status($host, $state, "$delta seconds old$extra_msg");
     foreach my $vserver_dir (@vserver_dirs) {
         $vsdir = "$dir/${subdir}$vserver_dir";
