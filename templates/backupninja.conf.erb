@@ -8,14 +8,14 @@ when = <%= send(:when) %>
 reportemail = <%= reportemail %>
 reportsuccess = <%= reportsuccess ? 'yes' : 'no' %>
 reportwarning = <%= reportwarning ? 'yes' : 'no' %>
-<% if reporthost.is_a? String -%>
-<%= 'reporthost = ' + reporthost %>
+<% if @reporthost -%>
+<%= 'reporthost = ' + @reporthost %>
 <% end -%>
-<% if reportuser.is_a? String -%>
-<%= 'reportuser = ' + reportuser %>
+<% if @reportuser -%>
+<%= 'reportuser = ' + @reportuser %>
 <% end -%>
-<% if reportdirectory.is_a? String -%>
-<%= 'reportdirectory = ' + reportdirectory %>
+<% if @reportdirectory -%>
+<%= 'reportdirectory = ' + @reportdirectory %>
 <% end -%>
 logfile = <%= logfile %>
 configdirectory = <%= configdir %>

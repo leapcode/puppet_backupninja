@@ -13,6 +13,21 @@ class backupninja (
   $keyowner = 0,
   $keygroup = 0,
   $keymanage = true,
+  $configfile = '/etc/backupninja.conf',
+  $loglvl = 4,
+  $when = 'everyday at 01:00',
+  $reportemail = 'root',
+  $reportsuccess = false,
+  $reportwarning = true,
+  $reporthost = undef,
+  $reportuser = undef,
+  $reportdirectory = undef,
+  $logfile = '/var/log/backupninja.log',
+  $configdir = '/etc/backup.d',
+  $scriptdir = '/usr/share/backupninja',
+  $libdir = '/usr/lib/backupninja',
+  $usecolors = true,
+  $vservers = false
 ) {
 
   # install client dependencies
@@ -63,6 +78,13 @@ class backupninja (
           'require' => 'File["$key_dest"]'
       })
     }
+  }
+
+ file { $configfile:
+    content => template('backupninja/backupninja.conf.erb'),
+    owner => root,
+    group => 0,
+    mode => '0644'
   }
 
 }
