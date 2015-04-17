@@ -82,7 +82,7 @@ sub check_rdiff {
     else {
         $service = 'backups';
     }
-    print_status($host, $state, "$delta seconds old$extra_msg", $service);
+    print_status($host, $state, "$delta hours old$extra_msg", $service);
     foreach my $vserver_dir (@vserver_dirs) {
         $vsdir = "$dir/$vserver_dir";
         if (opendir(DIR, $vsdir)) {
@@ -96,7 +96,7 @@ sub check_rdiff {
     my @dom_sufx = split(/\./, $host);
     my $dom_sufx = join('.', @dom_sufx[1,-1]);
     foreach my $vserver (@vservers) {
-        print_status("$vserver.$dom_sufx", $state, "$delta seconds old$extra_msg, same as parent: $host");
+        print_status("$vserver.$dom_sufx", $state, "$delta hours old$extra_msg, same as parent: $host");
     }
 }
 
@@ -111,6 +111,7 @@ sub check_age {
     } elsif ($delta >= 0) {
         $state = $STATE_OK;
     }
+    $delta = sprintf '%.2f', $delta/3600.0;
     return ($state, $delta);
 }
 
@@ -130,7 +131,7 @@ sub check_flag {
     }
     else {
         ($state, $delta) = check_age($stats[9]);
-        print_status($host, $state, "$delta seconds old");
+        print_status($host, $state, "$delta hours old");
     }
 }
 
