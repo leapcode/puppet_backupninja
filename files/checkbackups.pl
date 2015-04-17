@@ -34,6 +34,7 @@ my $STATE_WARNING=1;
 my $STATE_CRITICAL=2;
 my $STATE_UNKNOWN=3;
 my $STATE_DEPENDENT=4;
+my %ERRORS=(0=>'OK',1=>'WARNING',2=>'CRITICAL',3=>'UNKNOWN',4=>'DEPENDENT');
 
 # gross hack: we look into subdirs to find vservers
 my @vserver_dirs = qw{/var/lib/vservers /vservers};
@@ -117,10 +118,11 @@ sub check_age {
 
 sub print_status {
     my ($host, $state, $message, $service) = @_;
+    my $state_msg = $ERRORS{$state};
     if (!$service) {
         $service = 'backups';
     }
-    printf "$host\t$service\t$state\t$message\n";
+    printf "$host\t$service\t$state\t$state_msg $message\n";
 }
 
 sub check_flag {
