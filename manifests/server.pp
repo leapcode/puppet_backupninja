@@ -9,7 +9,8 @@ class backupninja::server (
   $backupdir = '/backup',
   $backupdir_ensure = 'directory',
   $backupserver_tag = $::fqdn,
-  $manage_nagios = false
+  $manage_nagios = false,
+  $nagios_server = undef
 ) {
 
   group { "backupninjas":
@@ -28,6 +29,10 @@ class backupninja::server (
 
   if $manage_nagios {
 
+    if $nagios_server == undef {
+      fail('Cannot manage nagios with undefined nagios_server parameter!')
+    }
+
     include nagios::nsca::client
     
     file { "/usr/local/bin/checkbackups":
@@ -37,7 +42,7 @@ class backupninja::server (
     }
 
     cron { checkbackups:
-      command => "/usr/local/bin/checkbackups -d $real_backupdir | /usr/sbin/send_nsca -H $nagios_server -c /etc/send_nsca.cfg | grep -v 'sent to host successfully'",
+      command => "/usr/local/bin/checkbackups -d $backupdir | /usr/sbin/send_nsca -H $nagios_server -c /etc/send_nsca.cfg | grep -v 'sent to host successfully'",
       user => "root",
       hour => "8-23",
       minute => 59,
