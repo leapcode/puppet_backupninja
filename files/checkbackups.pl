@@ -60,7 +60,7 @@ sub check_rdiff {
     my @vservers;
     if (open(FLAG, $flag)) {
         while (<FLAG>) {
-            if (/StartTime ([0-9]*).[0-9]* \((.*)\)/) {
+            if (/EndTime ([0-9]*).[0-9]* \((.*)\)/) {
                 $last_bak = $1;
                 $extra_msg = ' [backup.log]';
                 $opt_v && print STDERR "found timestamp $1 ($2) in backup.log\n";
