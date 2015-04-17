@@ -52,10 +52,10 @@ EOF
 	exit();
 }
 
-sub CheckRdiffBackups {
-    my ($dir, $subdir, $optv) = @_;
-    $flag="$dir/$subdir/rdiff-backup-data/backup.log";
-    $type="rdiff";
+sub check_rdiff {
+    my ($host, $dir, $subdir, $optv) = @_;
+    my $flag="$dir/$subdir/rdiff-backup-data/backup.log";
+    my $extra_msg = '';
     if (open(FLAG, $flag)) {
         while (<FLAG>) {
             if (/StartTime ([0-9]*).[0-9]* \((.*)\)/) {
@@ -72,6 +72,8 @@ sub CheckRdiffBackups {
         $opt_v && print STDERR "cannot open backup.log\n";
     }
     close(FLAG);
+    ($state, $delta) = check_age($stats[9]);
+    print_status($host, $state, "$delta seconds old$extra_msg");
     foreach my $vserver_dir (@vserver_dirs) {
         $vsdir = "$dir/${subdir}$vserver_dir";
         if (opendir(DIR, $vsdir)) {
@@ -82,12 +84,45 @@ sub CheckRdiffBackups {
             $opt_v && print STDERR "no vserver in $vsdir\n";
         }
     }
-    return ($message, $extra_msg, $last_bak);
+    my @dom_sufx = split(/\./, $host);
+    my $dom_sufx = join('.', @dom_sufx[1,-1]);
+    foreach my $vserver (@vservers) {
+        print_status("$vserver.$dom_sufx", $state, "$delta seconds old$extra_msg, same as parent: $host");
+    }
+}
+
+sub check_age {
+    my ($last_bak) = @_;
+    my $t = time();
+    my $delta = $t - $last_bak;
+    if ($delta > $opt_c) {
+        $state = $STATE_CRITICAL;
+    } elsif ($delta > $opt_w) {
+        $state = $STATE_WARNING;
+    } elsif ($delta >= 0) {
+        $state = $STATE_OK;
+    }
+    return ($state, $delta);
+}
+
+sub print_status {
+    my ($host, $state, $message) = @_;
+    printf "$host\tbackups\t$state\t$message\n";
+}
+
+sub check_flag {
+    my ($host, $flag) = @_;
+    my @stats = stat($flag);
+    if (not @stats) {
+        print_status($host, $state, "cannot stat flag $flag");
+    }
+    else {
+        ($state, $delta) = check_age($stats[9]);
+        print_status($host, $state, "$delta seconds old");
+    }
 }
 
 my $backupdir= $opt_d;
-my $crit = $opt_c;
-my $warn = $opt_w;
 
 my @hosts;
 if (defined($opt_o)) {
@@ -98,7 +133,7 @@ if (defined($opt_o)) {
 }
 
 chdir($backupdir);
-my ($state, $message, @vservers, $host);
+my ($delta, $state, $message, @vservers, $host);
 foreach $host (@hosts) {
 	chomp($host);
 	if ($opt_o) {
@@ -107,8 +142,6 @@ foreach $host (@hosts) {
 		$dir = $host;
 	}
 	my $flag="";
-	my $type="unknown";
-	my $extra_msg="";
 	@vservers = ();
 	$state = $STATE_UNKNOWN;
 	$message = "???";
@@ -117,51 +150,25 @@ foreach $host (@hosts) {
 		# XXX: the backup type should be part of the machine registry
 		my $last_bak;
 		if (-d "$dir/rdiff-backup") {
-                    my ($message, $extra_msg, $last_bak) = CheckRdiffBackups($dir, 'rdiff-backup', $opt_v);
+                    check_rdiff($host, $dir, 'rdiff-backup', $opt_v);
 		} elsif (-d "$dir/dump") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/dump/" . `ls -tr $dir/dump | tail -1`;
 			chomp($flag);
-			$type="dump";
+			check_flag($host, $flag);
 		} elsif (-d "$dir/dup") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/dup/" . `ls -tr $dir/dup | tail -1`;
 			chomp($flag);
-			$type="dup";
+			check_flag($host, $flag);
 		} elsif (-r "$dir/rsync.log") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/rsync.log";
-			$type="rsync";
+			check_flag($host, $flag);
 		} else {
-			$message = "unknown system";
-			next;
+                        print_status($host, $state, 'unknown system');
 		}
-		if (!defined($last_bak)) {
-			my @stats = stat($flag);
-			if (not @stats) {
-				$message = "cannot stat flag $flag";
-				next;
-			}
-			$last_bak = $stats[9];
-		}
-		my $t = time();
-		my $delta = $t - $last_bak;
-		if ($delta > $crit) {
-			$state = $STATE_CRITICAL;
-		} elsif ($delta > $warn) {
-			$state = $STATE_WARNING;
-		} elsif ($delta >= 0) {
-			$state = $STATE_OK;
-		}
-		$message = "$delta seconds old$extra_msg";
 	} else {
-		$message = "no directory";
-	}
-} continue {
-	printf "$host\tbackups\t$state\t$message\n";
-	my @dom_sufx = split(/\./, $host);
-	my $dom_sufx = join('.', @dom_sufx[1,-1]);
-	foreach my $vserver (@vservers) {
-		printf "$vserver.$dom_sufx\tbackups\t$state\t$message, same as parent: $host\n";
+            print_status($host, $state, 'no directory');
 	}
 }
