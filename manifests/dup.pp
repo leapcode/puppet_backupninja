@@ -71,12 +71,15 @@ define backupninja::duplicity( $order  = 90,
                                $vsinclude = false,
                                # [dest]
                                $incremental   = "yes",
+                               $increments   = false,
                                $keep          = false,
+                               $keepincroffulls = false,
                                $bandwidthlimit = false,
                                $sshoptions    = false,
                                $destdir       = false,
                                $desthost      = false,
                                $destuser      = false,
+                               $desturl       = false,
                                # configs to backupninja client
                                $backupkeystore       = false,
                                $backupkeystorefspath = '',
@@ -94,7 +97,7 @@ define backupninja::duplicity( $order  = 90,
                                $installkey           = true ) {
 
   # the client with configs for this machine
-  include backupninja::client::defaults
+  include backupninja::client::duplicity
 
   case $desthost { false: { err("need to define a destination host for remote backups!") } }
   case $destdir { false: { err("need to define a destination directory for remote backups!") } }
