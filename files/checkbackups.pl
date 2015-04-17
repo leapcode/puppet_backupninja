@@ -56,6 +56,7 @@ sub check_rdiff {
     my ($host, $dir, $subdir, $optv) = @_;
     my $flag="$dir/$subdir/rdiff-backup-data/backup.log";
     my $extra_msg = '';
+    my @vservers;
     if (open(FLAG, $flag)) {
         while (<FLAG>) {
             if (/StartTime ([0-9]*).[0-9]* \((.*)\)/) {
@@ -65,7 +66,7 @@ sub check_rdiff {
             }
         }
         if (!$last_bak) {
-            $message = "cannot parse backup.log for a valid timestamp";
+            print_status($host, $STATE_UNKNOWN, "cannot parse backup.log for a valid timestamp");
             next;
         }
     } else {
@@ -114,7 +115,7 @@ sub check_flag {
     my ($host, $flag) = @_;
     my @stats = stat($flag);
     if (not @stats) {
-        print_status($host, $state, "cannot stat flag $flag");
+        print_status($host, $STATE_UNKNOWN, "cannot stat flag $flag");
     }
     else {
         ($state, $delta) = check_age($stats[9]);
@@ -133,7 +134,7 @@ if (defined($opt_o)) {
 }
 
 chdir($backupdir);
-my ($delta, $state, $message, @vservers, $host);
+my ($delta, $state, $host);
 foreach $host (@hosts) {
 	chomp($host);
 	if ($opt_o) {
@@ -142,9 +143,6 @@ foreach $host (@hosts) {
 		$dir = $host;
 	}
 	my $flag="";
-	@vservers = ();
-	$state = $STATE_UNKNOWN;
-	$message = "???";
 	if (-d $dir) {
 		# guess the backup type and find a proper stamp file to compare
 		# XXX: the backup type should be part of the machine registry
@@ -166,9 +164,9 @@ foreach $host (@hosts) {
 			$flag="$dir/rsync.log";
 			check_flag($host, $flag);
 		} else {
-                        print_status($host, $state, 'unknown system');
+                        print_status($host, $STATE_UNKNOWN, 'unknown system');
 		}
 	} else {
-            print_status($host, $state, 'no directory');
+            print_status($host, $STATE_UNKNOWN, 'no directory');
 	}
 }
