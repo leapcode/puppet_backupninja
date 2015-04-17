@@ -53,8 +53,8 @@ EOF
 }
 
 sub check_rdiff {
-    my ($host, $dir, $subdir, $optv) = @_;
-    my $flag="$dir/$subdir/rdiff-backup-data/backup.log";
+    my ($host, $dir, $optv) = @_;
+    my $flag="$dir/rdiff-backup-data/backup.log";
     my $extra_msg = '';
     my @vservers;
     if (open(FLAG, $flag)) {
@@ -74,9 +74,17 @@ sub check_rdiff {
     }
     close(FLAG);
     ($state, $delta) = check_age($last_bak);
-    print_status($host, $state, "$delta seconds old$extra_msg");
+    $dir =~ /([^\/]*)\/rdiff-backup/;
+    if ($1 ne $host) {
+        # special subdir backup
+        $service = "backups-$1";
+    }
+    else {
+        $service = 'backups';
+    }
+    print_status($host, $state, "$delta seconds old$extra_msg", $service);
     foreach my $vserver_dir (@vserver_dirs) {
-        $vsdir = "$dir/${subdir}$vserver_dir";
+        $vsdir = "$dir/$vserver_dir";
         if (opendir(DIR, $vsdir)) {
             @vservers = grep { /^[^\.]/ && -d "$vsdir/$_" } readdir(DIR);
             $opt_v && print STDERR "found vservers $vsdir: @vservers\n";
@@ -107,8 +115,11 @@ sub check_age {
 }
 
 sub print_status {
-    my ($host, $state, $message) = @_;
-    printf "$host\tbackups\t$state\t$message\n";
+    my ($host, $state, $message, $service) = @_;
+    if (!$service) {
+        $service = 'backups';
+    }
+    printf "$host\t$service\t$state\t$message\n";
 }
 
 sub check_flag {
@@ -142,13 +153,19 @@ foreach $host (@hosts) {
 	} else {
 		$dir = $host;
 	}
-	my $flag="";
+	my $flag;
 	if (-d $dir) {
-		# guess the backup type and find a proper stamp file to compare
-		# XXX: the backup type should be part of the machine registry
-		my $last_bak;
+                # guess the backup type and find a proper stamp file to compare
+                @rdiffs = glob("$dir/*/*/rdiff-backup-data");
+                foreach $dir (@rdiffs) {
+                    $opt_v && print STDERR "inspecting dir $dir\n";
+                    $dir =~ s/rdiff-backup-data$//;
+                    check_rdiff($host, $dir, $opt_v);
+                    $flag = 1;
+                }
 		if (-d "$dir/rdiff-backup") {
-                    check_rdiff($host, $dir, 'rdiff-backup', $opt_v);
+                    check_rdiff($host, $dir . '/rdiff-backup', $opt_v);
+                    $flag = 1;
 		} elsif (-d "$dir/dump") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/dump/" . `ls -tr $dir/dump | tail -1`;
@@ -163,7 +180,8 @@ foreach $host (@hosts) {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/rsync.log";
 			check_flag($host, $flag);
-		} else {
+		}
+                if (!$flag) {
                         print_status($host, $STATE_UNKNOWN, 'unknown system');
 		}
 	} else {
