@@ -63,15 +63,15 @@ sub check_rdiff {
             if (/EndTime ([0-9]*).[0-9]* \((.*)\)/) {
                 $last_bak = $1;
                 $extra_msg = ' [backup.log]';
-                $opt_v && print STDERR "found timestamp $1 ($2) in backup.log\n";
+                $opt_v && print STDERR "found timestamp $1 ($2) in $flag\n";
             }
         }
         if (!$last_bak) {
-            print_status($host, $STATE_UNKNOWN, "cannot parse backup.log for a valid timestamp");
+            print_status($host, $STATE_UNKNOWN, "cannot parse $flag for a valid timestamp");
             next;
         }
     } else {
-        $opt_v && print STDERR "cannot open backup.log\n";
+        $opt_v && print STDERR "cannot open $flag\n";
     }
     close(FLAG);
     ($state, $delta) = check_age($last_bak);
