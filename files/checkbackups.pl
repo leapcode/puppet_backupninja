@@ -52,6 +52,39 @@ EOF
 	exit();
 }
 
+sub CheckRdiffBackups {
+    my ($dir, $subdir, $optv) = @_;
+    $flag="$dir/$subdir/rdiff-backup-data/backup.log";
+    $type="rdiff";
+    if (open(FLAG, $flag)) {
+        while (<FLAG>) {
+            if (/StartTime ([0-9]*).[0-9]* \((.*)\)/) {
+                $last_bak = $1;
+                $extra_msg = ' [backup.log]';
+                $opt_v && print STDERR "found timestamp $1 ($2) in backup.log\n";
+            }
+        }
+        if (!$last_bak) {
+            $message = "cannot parse backup.log for a valid timestamp";
+            next;
+        }
+    } else {
+        $opt_v && print STDERR "cannot open backup.log\n";
+    }
+    close(FLAG);
+    foreach my $vserver_dir (@vserver_dirs) {
+        $vsdir = "$dir/${subdir}$vserver_dir";
+        if (opendir(DIR, $vsdir)) {
+            @vservers = grep { /^[^\.]/ && -d "$vsdir/$_" } readdir(DIR);
+            $opt_v && print STDERR "found vservers $vsdir: @vservers\n";
+            closedir DIR;
+        } else {
+            $opt_v && print STDERR "no vserver in $vsdir\n";
+        }
+    }
+    return ($message, $extra_msg, $last_bak);
+}
+
 my $backupdir= $opt_d;
 my $crit = $opt_c;
 my $warn = $opt_w;
@@ -84,34 +117,7 @@ foreach $host (@hosts) {
 		# XXX: the backup type should be part of the machine registry
 		my $last_bak;
 		if (-d "$dir/rdiff-backup") {
-			$flag="$dir/rdiff-backup/rdiff-backup-data/backup.log";
-			$type="rdiff";
-			if (open(FLAG, $flag)) {
-				while (<FLAG>) {
-					if (/StartTime ([0-9]*).[0-9]* \((.*)\)/) {
-						$last_bak = $1;
-						$extra_msg = ' [backup.log]';
-						$opt_v && print STDERR "found timestamp $1 ($2) in backup.log\n";
-					}
-				}
-				if (!$last_bak) {
-					$message = "cannot parse backup.log for a valid timestamp";
-					next;
-				}
-			} else {
-				$opt_v && print STDERR "cannot open backup.log\n";
-			}
-			close(FLAG);
-			foreach my $vserver_dir (@vserver_dirs) {
-				$vsdir = "$dir/rdiff-backup$vserver_dir";
-    				if (opendir(DIR, $vsdir)) {
-    					@vservers = grep { /^[^\.]/ && -d "$vsdir/$_" } readdir(DIR);
-					$opt_v && print STDERR "found vservers $vsdir: @vservers\n";
-    					closedir DIR;
-				} else {
-					$opt_v && print STDERR "no vserver in $vsdir\n";
-				}
-			}
+                    my ($message, $extra_msg, $last_bak) = CheckRdiffBackups($dir, 'rdiff-backup', $opt_v);
 		} elsif (-d "$dir/dump") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/dump/" . `ls -tr $dir/dump | tail -1`;
