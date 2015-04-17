@@ -30,7 +30,7 @@ define backupninja::rdiff(
   $extras = false, $nagios_description = 'backups')
 {
   # install client dependencies
-  ensure_resource('package', 'rdiff-backup', {'ensure' => $backupninja::client::ensure_rdiffbackup_version})
+  ensure_resource('package', 'rdiff-backup', {'ensure' => $backupninja::ensure_rdiffbackup_version})
 
   $directory = "$home/rdiff-backup/"
 
@@ -51,7 +51,7 @@ define backupninja::rdiff(
         nagios_description => $nagios_description
       }
      
-      backupninja::client::key
+      backupninja::key
       {
         "${user}-${name}": user => $user, host => $host,
         installkey => $installkey,

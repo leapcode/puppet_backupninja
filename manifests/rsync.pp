@@ -31,7 +31,7 @@ define backupninja::rsync(
   $rm = false, $cp = false, $touch = false, $mv = false, $fsck = false)
 {
   # install client dependencies
-  ensure_resource('package', 'rsync', {'ensure' => $backupninja::client::ensure_rsync_version})
+  ensure_resource('package', 'rsync', {'ensure' => $backupninja::ensure_rsync_version})
 
   # Right now just local origin with remote destination is supported.
   $from = 'local'
@@ -68,7 +68,7 @@ define backupninja::rsync(
         nagios_description  => $nagios_description
       }
      
-      backupninja::client::key { "${user}-${name}":
+      backupninja::key { "${user}-${name}":
         user       => $user,
         host       => $host,
         installkey => $installkey,

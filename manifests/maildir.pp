@@ -24,7 +24,7 @@ define backupninja::maildir(
   $keepmonthly='2')
 {
   # install client dependencies
-  ensure_resource('package', 'rsync', {'ensure' => $backupninja::client::ensure_rsync_version})
+  ensure_resource('package', 'rsync', {'ensure' => $backupninja::ensure_rsync_version})
 
   case $srcdir { false: { err("need to define a source directory to backup!") } }
   case $destdir { false: { err("need to define a destination directory to backup!") } }

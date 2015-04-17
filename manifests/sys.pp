@@ -28,8 +28,8 @@ define backupninja::sys($order = 30,
   # install client dependencies
   case $operatingsystem {
     debian,ubuntu: {
-      ensure_resource('package', 'debconf-utils', {'ensure' => $backupninja::client::ensure_debconfutils_version})
-      ensure_resource('package', 'hwinfo', {'ensure' => $backupninja::client::ensure_hwinfo_version})
+      ensure_resource('package', 'debconf-utils', {'ensure' => $backupninja::ensure_debconfutils_version})
+      ensure_resource('package', 'hwinfo', {'ensure' => $backupninja::ensure_hwinfo_version})
     }
     default: {}
   }

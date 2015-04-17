@@ -1,4 +1,4 @@
-class backupninja::client (
+class backupninja (
   $ensure_backupninja_version = 'installed',
   $ensure_rsync_version = 'installed',
   $ensure_rdiffbackup_version = 'installed',

@@ -97,7 +97,7 @@ define backupninja::duplicity( $order  = 90,
                                $installkey           = true ) {
 
   # install client dependencies
-  ensure_resource('package', 'duplicity', {'ensure' => $backupninja::client::ensure_duplicity_version})
+  ensure_resource('package', 'duplicity', {'ensure' => $backupninja::ensure_duplicity_version})
 
   case $desthost { false: { err("need to define a destination host for remote backups!") } }
   case $destdir { false: { err("need to define a destination directory for remote backups!") } }
@@ -118,7 +118,7 @@ define backupninja::duplicity( $order  = 90,
   }
 
   # the client's ssh key
-  backupninja::client::key { "${destuser}-${name}":
+  backupninja::key { "${destuser}-${name}":
     user           => $destuser,
     host           => $desthost,
     createkey      => $createkey,
