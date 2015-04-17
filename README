@@ -18,10 +18,14 @@ and can now be overridden thanks to the brand new technology of class
 parameters. This class also manages the backupninja configuration file,
 replacing the backupninja::config ressource.
 
-The backupninja::server class has some minor changes, including some
-changes related to the nagios passive checks. See the code for details.
+The backupninja::server class now takes parameters, replacing several
+global variables such as $backupdir, $backupserver_tag and
+$nagios_server. The $manage_nagios parameter also replaces the
+$use_nagios global.
 
-Handlers are *mostly* unchanged.
+As for handlers, they don't include the backupninja::client anymore and
+now read several default values from the backupninja base class. Most
+handler declarations shouldn't need any changes.
 
 See below for dependencies which have been introduced in this version.
 
