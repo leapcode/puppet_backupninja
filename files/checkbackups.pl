@@ -164,16 +164,13 @@ foreach $host (@hosts) {
 	if (-d $dir) {
                 # guess the backup type and find a proper stamp file to compare
                 @rdiffs = glob("$dir/*/rdiff-backup-data");
-                foreach $dir (@rdiffs) {
-                    $opt_v && print STDERR "inspecting dir $dir\n";
-                    $dir =~ s/rdiff-backup-data$//;
-                    check_rdiff($host, $dir, $opt_v);
+                foreach $subdir (@rdiffs) {
+                    $subdir =~ s/rdiff-backup-data$//;
+                    $opt_v && print STDERR "inspecting dir $subdir\n";
+                    check_rdiff($host, $subdir, $opt_v);
                     $flag = 1;
                 }
-		if (-d "$dir/rdiff-backup") {
-                    check_rdiff($host, $dir . '/rdiff-backup', $opt_v);
-                    $flag = 1;
-		} elsif (-d "$dir/dump") {
+		if (-d "$dir/dump") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/dump/" . `ls -tr $dir/dump | tail -1`;
 			chomp($flag);
