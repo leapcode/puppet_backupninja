@@ -76,14 +76,8 @@ sub check_rdiff {
     }
     close(FLAG);
     ($state, $delta) = check_age($last_bak);
-    $dir =~ /([^\/]*)\/rdiff-backup/;
-    if ($1 ne $host) {
-        # special subdir backup
-        $service = "backups-$1";
-    }
-    else {
-        $service = 'backups';
-    }
+    $dir =~ /([^\/]+)\/?$/;
+    $service = "backups-$1";
     print_status($host, $state, "$delta hours old$extra_msg", $service);
     foreach my $vserver_dir (@vserver_dirs) {
         $vsdir = "$dir/$vserver_dir";
