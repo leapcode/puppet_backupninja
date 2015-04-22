@@ -163,7 +163,7 @@ foreach $host (@hosts) {
 	my $flag;
 	if (-d $dir) {
                 # guess the backup type and find a proper stamp file to compare
-                @rdiffs = glob("$dir/*/*/rdiff-backup-data");
+                @rdiffs = glob("$dir/*/rdiff-backup-data");
                 foreach $dir (@rdiffs) {
                     $opt_v && print STDERR "inspecting dir $dir\n";
                     $dir =~ s/rdiff-backup-data$//;
