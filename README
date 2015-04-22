@@ -20,6 +20,20 @@ doubled as the home for the user that was created. This caused
 problems with rdiff-backup because of dot files and other things which
 were not part of any rdiff-backup.
 
+The rdiff resource name is now used as the subdirectory where rdiff
+backups are sent. This was previously hardcoded to "rdiff-backup", but
+in order to support multiple rdiff backups per host, we now use the
+resource name. So if you were using the following resource:
+
+    backupninja::rdiff { 'main': }
+
+You will want to use the following resource:
+
+    backupninja::rdiff { 'rdiff-backup': }
+    file { '/etc/backup.d/90_main.rdiff': ensure => absent; }
+
+Otherwise your backups may be duplicated!
+
 Getting started
 ---------------
 
