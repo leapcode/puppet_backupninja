@@ -17,25 +17,27 @@
 #
 # 
 define backupninja::maildir(
-  $order = 99, $ensure = present, $when = 'everyday at 21:00', $srcdir = false,
+  $order = 99, $ensure = present,
+  $when = 'everyday at 21:00', $srcdir = false,
   $destdir = false, $desthost = false, $destuser = false, $destid_file = false,
   $remove = false, $multiconnection = yes, $keepdaily='4', $keepweekly='2',
   $keepmonthly='2')
 {
-  include backupninja::client::maildir
-                          
+  # install client dependencies
+  ensure_resource('package', 'rsync', {'ensure' => $backupninja::ensure_rsync_version})
+
   case $srcdir { false: { err("need to define a source directory to backup!") } }
   case $destdir { false: { err("need to define a destination directory to backup!") } }
   case $desthost { false: { err("need to define a destination host for backups!") } }
   case $destuser { false: { err("need to define a destination user for backups!") } }
   case $destid_file { false: { err("need to define a ssh key id file to use!") } }
   
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.maildir":
+  file { "${backupninja::configdir}/${order}_${name}.maildir":
     ensure => $ensure,
     content => template('backupninja/maildir.conf.erb'),
     owner => root,
     group => root,
     mode => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }

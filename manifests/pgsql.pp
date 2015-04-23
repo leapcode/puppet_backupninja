@@ -16,14 +16,12 @@
 define backupninja::pgsql(
   $order = 10, $ensure = present, $databases = 'all', $backupdir = "/var/backups/postgres", $compress = true, $vsname = false)
 {
-  
-  include backupninja::client::defaults
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.pgsql":
+  file { "${backupninja::configdir}/${order}_${name}.pgsql":
     ensure => $ensure,
     content => template('backupninja/pgsql.conf.erb'),
     owner => root,
     group => root,
     mode => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }

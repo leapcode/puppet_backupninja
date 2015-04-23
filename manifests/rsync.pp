@@ -2,11 +2,12 @@
 # Based on backupninja::rdiff
 
 define backupninja::rsync(
-  $order = 90, $ensure = present, $user = false, $home = false, $host = false,
+  $order = 90, $ensure = present,
+  $user = false, $home = false, $host = false,
   $ssh_dir_manage = true, $ssh_dir = false, $authorized_keys_file = false,
   $installuser = true, $installkey = true, $key = false, $backuptag = false,
-  $home = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false,
-  $nagios2_description = 'backups', $subfolder = 'rsync',
+  $home = false, $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore, $extras = false,
+  $nagios_description = 'backups', $subfolder = 'rsync',
 
   $log = false, $partition = false, $fscheck = false, $read_only = false,
   $mountpoint = false, $backupdir = false, $format = false, $days = false,
@@ -29,7 +30,8 @@ define backupninja::rsync(
 
   $rm = false, $cp = false, $touch = false, $mv = false, $fsck = false)
 {
-  include backupninja::client::rsync
+  # install client dependencies
+  ensure_resource('package', 'rsync', {'ensure' => $backupninja::ensure_rsync_version})
 
   # Right now just local origin with remote destination is supported.
   $from = 'local'
@@ -63,10 +65,10 @@ define backupninja::rsync(
         backuptag            => $real_backuptag,
         keytype              => $backupkeytype,
         backupkeys           => $backupkeystore,
-        nagios2_description  => $nagios2_description
+        nagios_description  => $nagios_description
       }
      
-      backupninja::client::key { "${user}-${name}":
+      backupninja::key { "${user}-${name}":
         user       => $user,
         host       => $host,
         installkey => $installkey,
@@ -76,12 +78,12 @@ define backupninja::rsync(
     }
   }
 
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.rsync":
+  file { "${backupninja::configdir}/${order}_${name}.rsync":
     ensure  => $ensure,
     content => template('backupninja/rsync.conf.erb'),
     owner   => root,
     group   => root,
     mode    => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }

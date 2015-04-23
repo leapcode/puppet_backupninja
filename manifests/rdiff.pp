@@ -16,8 +16,8 @@
 #      directories.
 # 
 define backupninja::rdiff(
-  $order = 90, $ensure = present, $user = false,
-  $home = "/home/${user}-${name}", $host = false,
+  $order = 90, $ensure = present, 
+  $user = false, $home = "/home/${user}-${name}", $host = false,
   $type = 'local',
   $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
                "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
@@ -26,9 +26,11 @@ define backupninja::rdiff(
                "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
   $vsinclude = false, $keep = 30, $sshoptions = false, $options = '--force', $ssh_dir_manage = true,
   $ssh_dir = false, $authorized_keys_file = false, $installuser = true, $installkey = true, $key = false,
-  $backuptag = false, $backupkeytype = "rsa", $backupkeystore = false, $extras = false, $nagios2_description = 'backups')
+  $backuptag = false, $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore,
+  $extras = false, $nagios_description = 'backups')
 {
-  include backupninja::client::rdiff_backup
+  # install client dependencies
+  ensure_resource('package', 'rdiff-backup', {'ensure' => $backupninja::ensure_rdiffbackup_version})
 
   $directory = "$home/rdiff-backup/"
 
@@ -46,10 +48,10 @@ define backupninja::rdiff(
         manage_ssh_dir => $ssh_dir_manage, ssh_dir => $ssh_dir, key => $key,
         authorized_keys_file => $authorized_keys_file, installuser => $installuser,
         backuptag => $real_backuptag, keytype => $backupkeytype, backupkeys => $backupkeystore,
-        nagios2_description => $nagios2_description
+        nagios_description => $nagios_description
       }
      
-      backupninja::client::key
+      backupninja::key
       {
         "${user}-${name}": user => $user, host => $host,
         installkey => $installkey,
@@ -60,13 +62,13 @@ define backupninja::rdiff(
   }
 
 
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.rdiff":
+  file { "${backupninja::configdir}/${order}_${name}.rdiff":
     ensure => $ensure,
     content => template('backupninja/rdiff.conf.erb'),
     owner => root,
     group => root,
     mode => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }
   

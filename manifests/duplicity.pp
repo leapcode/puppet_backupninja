@@ -81,11 +81,11 @@ define backupninja::duplicity( $order  = 90,
                                $destuser      = false,
                                $desturl       = false,
                                # configs to backupninja client
-                               $backupkeystore       = false,
-                               $backupkeystorefspath = '',
-                               $backupkeytype        = "rsa",
-                               $backupkeydest        = false,
-                               $backupkeydestname    = false,
+                               $backupkeystore       = $backupninja::keystore,
+                               $backupkeystorefspath = $backupninja::keystorefspath,
+                               $backupkeytype        = $backupninja::keytype,
+                               $backupkeydest        = $backupninja::keydest,
+                               $backupkeydestname    = $backupninja::keydestname,
                                # options to backupninja server sandbox
                                $ssh_dir_manage       = true,
                                $ssh_dir              = false,
@@ -96,8 +96,8 @@ define backupninja::duplicity( $order  = 90,
                                $createkey            = false,
                                $installkey           = true ) {
 
-  # the client with configs for this machine
-  include backupninja::client::duplicity
+  # install client dependencies
+  ensure_resource('package', 'duplicity', {'ensure' => $backupninja::ensure_duplicity_version})
 
   case $desthost { false: { err("need to define a destination host for remote backups!") } }
   case $destdir { false: { err("need to define a destination directory for remote backups!") } }
@@ -118,7 +118,7 @@ define backupninja::duplicity( $order  = 90,
   }
 
   # the client's ssh key
-  backupninja::client::key { "${destuser}-${name}":
+  backupninja::key { "${destuser}-${name}":
     user           => $destuser,
     host           => $desthost,
     createkey      => $createkey,
@@ -131,13 +131,13 @@ define backupninja::duplicity( $order  = 90,
   }
 
   # the backupninja rule for this duplicity backup
-  file { "${backupninja::client::defaults::configdir}/${order}_${name}.dup":
+  file { "${backupninja::configdir}/${order}_${name}.dup":
     ensure  => $ensure,
     content => template('backupninja/dup.conf.erb'),
     owner   => root,
     group   => root,
     mode    => 0600,
-    require => File["${backupninja::client::defaults::configdir}"]
+    require => File["${backupninja::configdir}"]
   }
 }
 
