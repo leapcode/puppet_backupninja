@@ -70,7 +70,6 @@ define backupninja::rsync(
      
       backupninja::key { "${user}-${name}":
         user       => $user,
-        host       => $host,
         keymanage  => $keymanage,
         keytype    => $backupkeytype,
         keystore   => $backupkeystore,

@@ -53,7 +53,7 @@ define backupninja::rdiff(
      
       backupninja::key
       {
-        "${user}-${name}": user => $user, host => $host,
+        "${user}-${name}": user => $user,
         keymanage => $keymanage,
         keytype => $backupkeytype,
         keystore => $backupkeystore,

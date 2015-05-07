@@ -120,7 +120,6 @@ define backupninja::duplicity( $order  = 90,
   # the client's ssh key
   backupninja::key { "${destuser}-${name}":
     user           => $destuser,
-    host           => $desthost,
     createkey      => $createkey,
     keymanage      => $keymanage,
     keytype        => $backupkeytype,
