@@ -73,13 +73,13 @@ class backupninja::server (
       }
     }
 
-    ensure_resource('file', $dir, {
-        'ensure' => 'directory',
-        'mode' => '0750',
-        'owner' => $user,
-        'group' => 0,
-        'tag' => $backuptag
-    })
+    if !defined(File["$dir"]) {
+      @@file { "$dir":
+        ensure => directory,
+        mode => 0750, owner => $user, group => 0,
+        tag => "$backuptag",
+      }
+    }
 
     case $installuser {
       true: {
