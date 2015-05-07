@@ -57,13 +57,9 @@ class backupninja::server (
   # get created on the server
   define sandbox(
     $user = $name, $host = $::fqdn, $installuser = true, $dir = "${backupninja::server::backupdir}/${::fqdn}", $manage_ssh_dir = true,
-    $ssh_dir = false, $authorized_keys_file = 'authorized_keys', $key = false, $keytype = 'dss', $backupkeys = "${fileserver}/keys/backupkeys", $uid = false,
+    $ssh_dir = "${backupninja::server::backupdir}/${::fqdn}/.ssh", $authorized_keys_file = 'authorized_keys', $key = false, $keytype = 'dss', $backupkeys = "${fileserver}/keys/backupkeys", $uid = false,
     $gid = "backupninjas", $backuptag = "backupninja-${::fqdn}", $nagios_description = 'backups')
   {
-
-    if $ssh_dir == false {
-      $ssh_dir = "${dir}/.ssh"
-    }
 
     if $manage_nagios {
       # configure a passive service check for backups
