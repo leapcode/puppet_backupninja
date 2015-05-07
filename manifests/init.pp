@@ -49,7 +49,7 @@ class backupninja (
     $keystorefspath = $backupninja::keystorefspath,
     $keytype = $backupninja::keytype,
     $keydest = $backupninja::keydest,
-    $keydestname = "id_${backupninja::keytpe}" )
+    $keydestname = "id_${backupninja::keytype}" )
   {
 
     # generate the key
@@ -75,7 +75,7 @@ class backupninja (
           'mode'    => '0700',
           'owner'   => $keyowner,
           'group'   => $keygroup,
-          'require' => 'File["$key_dest"]'
+          'require' => File["$key_dest"],
       })
     }
   }
