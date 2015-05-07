@@ -75,7 +75,7 @@ class backupninja (
           'mode'    => '0700',
           'owner'   => $keyowner,
           'group'   => $keygroup,
-          'require' => File["$key_dest"],
+          'require' => File["$keydest"],
       })
     }
   }
