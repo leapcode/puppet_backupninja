@@ -24,9 +24,12 @@ $nagios_server. The $manage_nagios parameter also replaces the
 $use_nagios global.
 
 As for handlers, they don't include the backupninja::client anymore and
-now read several default values from the backupninja base class. If you
-were using the rdiff-backup handler, read the following section
-carefully. Other handlers have not changed in any significant way.
+now read several default values from the backupninja base class. The
+$installkey parameter used in several handlers has been renamed to
+$keymanage, to keep in line with the base class parameter.
+
+If you were using the rdiff-backup handler, you need to read the
+following section carefully.
 
 Changes to the rdiff-backup handler
 -----------------------------------

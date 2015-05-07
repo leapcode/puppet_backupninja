@@ -94,7 +94,7 @@ define backupninja::duplicity( $order  = 90,
                                $backuptag            = false,
                                # key options
                                $createkey            = false,
-                               $installkey           = true ) {
+                               $keymanage            = $backupninja::keymanage ) {
 
   # install client dependencies
   ensure_resource('package', 'duplicity', {'ensure' => $backupninja::ensure_duplicity_version})
@@ -122,7 +122,7 @@ define backupninja::duplicity( $order  = 90,
     user           => $destuser,
     host           => $desthost,
     createkey      => $createkey,
-    installkey     => $installkey,
+    keymanage      => $keymanage,
     keytype        => $backupkeytype,
     keystore       => $backupkeystore,
     keystorefspath => $backupkeystorefspath,

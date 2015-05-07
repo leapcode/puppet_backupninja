@@ -25,7 +25,7 @@ define backupninja::rdiff(
   $include = [ "/var/spool/cron/crontabs", "/var/backups", "/etc", "/root",
                "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
   $vsinclude = false, $keep = 30, $sshoptions = false, $options = '--force', $ssh_dir_manage = true,
-  $ssh_dir = false, $authorized_keys_file = false, $installuser = true, $installkey = true, $key = false,
+  $ssh_dir = false, $authorized_keys_file = false, $installuser = true, $keymanage = $backupninja::keymanage, $key = false,
   $backuptag = false, $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore,
   $extras = false, $nagios_description = 'backups')
 {
@@ -54,7 +54,7 @@ define backupninja::rdiff(
       backupninja::key
       {
         "${user}-${name}": user => $user, host => $host,
-        installkey => $installkey,
+        keymanage => $keymanage,
         keytype => $backupkeytype,
         keystore => $backupkeystore,
       }
