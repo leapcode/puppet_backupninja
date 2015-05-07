@@ -32,7 +32,7 @@ define backupninja::rdiff(
   # install client dependencies
   ensure_resource('package', 'rdiff-backup', {'ensure' => $backupninja::ensure_rdiffbackup_version})
 
-  $directory = "$home/rdiff-backup/"
+  $directory = "$home/$name/"
 
   case $type {
     'remote': {

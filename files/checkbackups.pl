@@ -34,6 +34,7 @@ my $STATE_WARNING=1;
 my $STATE_CRITICAL=2;
 my $STATE_UNKNOWN=3;
 my $STATE_DEPENDENT=4;
+my %ERRORS=(0=>'OK',1=>'WARNING',2=>'CRITICAL',3=>'UNKNOWN',4=>'DEPENDENT');
 
 # gross hack: we look into subdirs to find vservers
 my @vserver_dirs = qw{/var/lib/vservers /vservers};
@@ -43,18 +44,104 @@ our $opt_c = 48 * 60 * 60;
 our $opt_w = 24 * 60 * 60;
 our $opt_v = 0;
 our $opt_o;
+our $opt_s;
 
-if (!getopts('d:c:w:vo')) {
+if (!getopts('d:c:w:s:vo')) {
 	print <<EOF
-Usage: $0 [ -d <backupdir> ] [ -c <threshold> ] [ -w <threshold> ] [ -o ] [ -v ]
+Usage: $0 [ -d <backupdir> ] [ -c <threshold> ] [ -w <threshold> ] [ -o ] [ -s <host> ] [ -v ]
 EOF
 	;
 	exit();
 }
 
+sub check_rdiff {
+    my ($host, $dir, $optv) = @_;
+    my $flag="$dir/rdiff-backup-data/backup.log";
+    my $extra_msg = '';
+    my @vservers;
+    if (open(FLAG, $flag)) {
+        while (<FLAG>) {
+            if (/EndTime ([0-9]*).[0-9]* \((.*)\)/) {
+                $last_bak = $1;
+                $extra_msg = ' [backup.log]';
+                $opt_v && print STDERR "found timestamp $1 ($2) in $flag\n";
+            }
+        }
+        if (!$last_bak) {
+            print_status($host, $STATE_UNKNOWN, "cannot parse $flag for a valid timestamp");
+            next;
+        }
+    } else {
+        $opt_v && print STDERR "cannot open $flag\n";
+    }
+    close(FLAG);
+    ($state, $delta) = check_age($last_bak);
+    $dir =~ /([^\/]+)\/?$/;
+    $service = "backups-$1";
+    print_status($host, $state, "$delta hours old$extra_msg", $service);
+    foreach my $vserver_dir (@vserver_dirs) {
+        $vsdir = "$dir/$vserver_dir";
+        if (opendir(DIR, $vsdir)) {
+            @vservers = grep { /^[^\.]/ && -d "$vsdir/$_" } readdir(DIR);
+            $opt_v && print STDERR "found vservers $vsdir: @vservers\n";
+            closedir DIR;
+        } else {
+            $opt_v && print STDERR "no vserver in $vsdir\n";
+        }
+    }
+    my @dom_sufx = split(/\./, $host);
+    my $dom_sufx = join('.', @dom_sufx[1,-1]);
+    foreach my $vserver (@vservers) {
+        print_status("$vserver.$dom_sufx", $state, "$delta hours old$extra_msg, same as parent: $host");
+    }
+}
+
+sub check_age {
+    my ($last_bak) = @_;
+    my $t = time();
+    my $delta = $t - $last_bak;
+    if ($delta > $opt_c) {
+        $state = $STATE_CRITICAL;
+    } elsif ($delta > $opt_w) {
+        $state = $STATE_WARNING;
+    } elsif ($delta >= 0) {
+        $state = $STATE_OK;
+    }
+    $delta = sprintf '%.2f', $delta/3600.0;
+    return ($state, $delta);
+}
+
+sub print_status {
+    my ($host, $state, $message, $service) = @_;
+    my $state_msg = $ERRORS{$state};
+    if (!$service) {
+        $service = 'backups';
+    }
+    $line = "$host\t$service\t$state\t$state_msg $message\n";
+    if ($opt_s) {
+	$opt_v && print STDERR "sending results to nagios...\n";
+        open(NSCA, "|/usr/sbin/send_nsca -H $opt_s") or die("cannot start send_nsca: $!\n");
+        print NSCA $line;
+        close(NSCA) or warn("could not close send_nsca pipe correctly: $!\n");
+    }
+    if (!$opt_s || $opt_v) {
+        printf $line;
+    }
+}
+
+sub check_flag {
+    my ($host, $flag) = @_;
+    my @stats = stat($flag);
+    if (not @stats) {
+        print_status($host, $STATE_UNKNOWN, "cannot stat flag $flag");
+    }
+    else {
+        ($state, $delta) = check_age($stats[9]);
+        print_status($host, $state, "$delta hours old");
+    }
+}
+
 my $backupdir= $opt_d;
-my $crit = $opt_c;
-my $warn = $opt_w;
 
 my @hosts;
 if (defined($opt_o)) {
@@ -65,7 +152,7 @@ if (defined($opt_o)) {
 }
 
 chdir($backupdir);
-my ($state, $message, @vservers, $host);
+my ($delta, $state, $host);
 foreach $host (@hosts) {
 	chomp($host);
 	if ($opt_o) {
@@ -73,89 +160,35 @@ foreach $host (@hosts) {
 	} else {
 		$dir = $host;
 	}
-	my $flag="";
-	my $type="unknown";
-	my $extra_msg="";
-	@vservers = ();
-	$state = $STATE_UNKNOWN;
-	$message = "???";
+	my $flag;
 	if (-d $dir) {
-		# guess the backup type and find a proper stamp file to compare
-		# XXX: the backup type should be part of the machine registry
-		my $last_bak;
-		if (-d "$dir/rdiff-backup") {
-			$flag="$dir/rdiff-backup/rdiff-backup-data/backup.log";
-			$type="rdiff";
-			if (open(FLAG, $flag)) {
-				while (<FLAG>) {
-					if (/StartTime ([0-9]*).[0-9]* \((.*)\)/) {
-						$last_bak = $1;
-						$extra_msg = ' [backup.log]';
-						$opt_v && print STDERR "found timestamp $1 ($2) in backup.log\n";
-					}
-				}
-				if (!$last_bak) {
-					$message = "cannot parse backup.log for a valid timestamp";
-					next;
-				}
-			} else {
-				$opt_v && print STDERR "cannot open backup.log\n";
-			}
-			close(FLAG);
-			foreach my $vserver_dir (@vserver_dirs) {
-				$vsdir = "$dir/rdiff-backup$vserver_dir";
-    				if (opendir(DIR, $vsdir)) {
-    					@vservers = grep { /^[^\.]/ && -d "$vsdir/$_" } readdir(DIR);
-					$opt_v && print STDERR "found vservers $vsdir: @vservers\n";
-    					closedir DIR;
-				} else {
-					$opt_v && print STDERR "no vserver in $vsdir\n";
-				}
-			}
-		} elsif (-d "$dir/dump") {
+                # guess the backup type and find a proper stamp file to compare
+                @rdiffs = glob("$dir/*/rdiff-backup-data");
+                foreach $subdir (@rdiffs) {
+                    $subdir =~ s/rdiff-backup-data$//;
+                    $opt_v && print STDERR "inspecting dir $subdir\n";
+                    check_rdiff($host, $subdir, $opt_v);
+                    $flag = 1;
+                }
+		if (-d "$dir/dump") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/dump/" . `ls -tr $dir/dump | tail -1`;
 			chomp($flag);
-			$type="dump";
+			check_flag($host, $flag);
 		} elsif (-d "$dir/dup") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/dup/" . `ls -tr $dir/dup | tail -1`;
 			chomp($flag);
-			$type="dup";
+			check_flag($host, $flag);
 		} elsif (-r "$dir/rsync.log") {
 			# XXX: this doesn't check backup consistency
 			$flag="$dir/rsync.log";
-			$type="rsync";
-		} else {
-			$message = "unknown system";
-			next;
+			check_flag($host, $flag);
 		}
-		if (!defined($last_bak)) {
-			my @stats = stat($flag);
-			if (not @stats) {
-				$message = "cannot stat flag $flag";
-				next;
-			}
-			$last_bak = $stats[9];
+                if (!$flag) {
+                        print_status($host, $STATE_UNKNOWN, 'unknown system');
 		}
-		my $t = time();
-		my $delta = $t - $last_bak;
-		if ($delta > $crit) {
-			$state = $STATE_CRITICAL;
-		} elsif ($delta > $warn) {
-			$state = $STATE_WARNING;
-		} elsif ($delta >= 0) {
-			$state = $STATE_OK;
-		}
-		$message = "$delta seconds old$extra_msg";
 	} else {
-		$message = "no directory";
-	}
-} continue {
-	printf "$host\tbackups\t$state\t$message\n";
-	my @dom_sufx = split(/\./, $host);
-	my $dom_sufx = join('.', @dom_sufx[1,-1]);
-	foreach my $vserver (@vservers) {
-		printf "$vserver.$dom_sufx\tbackups\t$state\t$message, same as parent: $host\n";
+            print_status($host, $STATE_UNKNOWN, 'no directory');
 	}
 }
