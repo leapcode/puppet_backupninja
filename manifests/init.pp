@@ -71,7 +71,7 @@ class backupninja (
       })
       ensure_resource('file', $keydestfile, {
           'ensure'  => 'present',
-          'source'  => "${keystore}/${real_user}_id_${key_type}",
+          'source'  => "${keystore}/${user}_id_${keytype}",
           'mode'    => '0700',
           'owner'   => $keyowner,
           'group'   => $keygroup,
