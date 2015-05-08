@@ -5,7 +5,7 @@ define backupninja::rsync(
   $order = 90, $ensure = present,
   $user = false, $home = "/home/${user}-${name}", $host = false,
   $ssh_dir_manage = true, $ssh_dir = "${home}/.ssh", $authorized_keys_file = 'authorized_keys',
-  $installuser = true, $keymanage = $backupninja::keymanage, $key = false, $backuptag = false,
+  $installuser = true, $keymanage = $backupninja::keymanage, $key = false, $backuptag = "backupninja-${::fqdn}",
   $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore, $extras = false,
   $nagios_description = 'backups', $subfolder = 'rsync',
 
@@ -41,11 +41,6 @@ define backupninja::rsync(
     'remote': {
       case $host { false: { err("need to define a host for remote backups!") } }
 
-      $real_backuptag = $backuptag ? {
-        false   => "backupninja-$fqdn",
-        default => $backuptag,
-      }
-
       $directory = "${home}/${subfolder}/"
 
       backupninja::server::sandbox { "${user}-${name}":
@@ -57,7 +52,7 @@ define backupninja::rsync(
         key                  => $key,
         authorized_keys_file => $authorized_keys_file,
         installuser          => $installuser,
-        backuptag            => $real_backuptag,
+        backuptag            => $backuptag,
         keytype              => $backupkeytype,
         backupkeys           => $backupkeystore,
         nagios_description  => $nagios_description

@@ -26,7 +26,7 @@ define backupninja::rdiff(
                "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
   $vsinclude = false, $keep = 30, $sshoptions = false, $options = '--force', $ssh_dir_manage = true,
   $ssh_dir = "${home}/.ssh", $authorized_keys_file = 'authorized_keys', $installuser = true, $keymanage = $backupninja::keymanage, $key = false,
-  $backuptag = false, $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore,
+  $backuptag = "backupninja-${::fqdn}", $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore,
   $extras = false, $nagios_description = 'backups')
 {
   # install client dependencies
@@ -37,17 +37,13 @@ define backupninja::rdiff(
   case $type {
     'remote': {
       case $host { false: { err("need to define a host for remote backups!") } }
-      $real_backuptag = $backuptag ? {
-          false => "backupninja-$fqdn",
-          default => $backuptag
-      }
 
       backupninja::server::sandbox
       {
         "${user}-${name}": user => $user, host => $fqdn, dir => $home,
         manage_ssh_dir => $ssh_dir_manage, ssh_dir => $ssh_dir, key => $key,
         authorized_keys_file => $authorized_keys_file, installuser => $installuser,
-        backuptag => $real_backuptag, keytype => $backupkeytype, backupkeys => $backupkeystore,
+        backuptag => $backuptag, keytype => $backupkeytype, backupkeys => $backupkeystore,
         nagios_description => $nagios_description
       }
      

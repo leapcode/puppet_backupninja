@@ -91,7 +91,7 @@ define backupninja::duplicity( $order  = 90,
                                $ssh_dir              = "${destdir}/.ssh",
                                $authorized_keys_file = 'authorized_keys',
                                $installuser          = true,
-                               $backuptag            = false,
+                               $backuptag            = "backupninja-${::fqdn}",
                                # key options
                                $createkey            = false,
                                $keymanage            = $backupninja::keymanage ) {
