@@ -9,7 +9,9 @@ class backupninja::server (
   $backupdir = '/backup',
   $backupdir_ensure = 'directory',
   $manage_nagios = false,
-  $nagios_server = undef
+  $nagios_server = undef,
+  $nagios_warn_level = 129600,
+  $nagios_crit_level = 216000,
 ) {
 
   group { "backupninjas":
@@ -28,9 +30,7 @@ class backupninja::server (
 
   if $manage_nagios {
 
-    if $nagios_server == undef {
-      fail('Cannot manage nagios with undefined nagios_server parameter!')
-    }
+    case $nagios_server { undef: { err('Cannot manage nagios without nagios_server parameter!') } }
 
     include nagios::nsca::client
     
@@ -41,7 +41,7 @@ class backupninja::server (
     }
 
     cron { checkbackups:
-      command => "/usr/local/bin/checkbackups -d $backupdir | /usr/sbin/send_nsca -H $nagios_server -c /etc/send_nsca.cfg | grep -v 'sent to host successfully'",
+      command => "/usr/local/bin/checkbackups -d ${backupdir} -s ${nagios_server} -w ${nagios_warn_level} -c ${nagios_crit_level} | grep -v 'sent to host successfully",
       user => "root",
       hour => "8-23",
       minute => 59,
@@ -60,7 +60,7 @@ class backupninja::server (
     $gid = "backupninjas", $backuptag = "backupninja-${::fqdn}", $nagios_description = 'backups')
   {
 
-    if $manage_nagios {
+    if $backupninja::manage_nagios {
       # configure a passive service check for backups
       nagios::service::passive { $nagios_description: }
     }

@@ -27,7 +27,7 @@ define backupninja::rdiff(
   $vsinclude = false, $keep = 30, $sshoptions = false, $options = '--force', $ssh_dir_manage = true,
   $ssh_dir = "${home}/.ssh", $authorized_keys_file = 'authorized_keys', $installuser = true, $keymanage = $backupninja::keymanage, $key = false,
   $backuptag = "backupninja-${::fqdn}", $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore,
-  $extras = false, $nagios_description = 'backups')
+  $extras = false, $nagios_description = "backups-${name}")
 {
   # install client dependencies
   ensure_resource('package', 'rdiff-backup', {'ensure' => $backupninja::ensure_rdiffbackup_version})

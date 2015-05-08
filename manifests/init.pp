@@ -27,7 +27,8 @@ class backupninja (
   $scriptdir = '/usr/share/backupninja',
   $libdir = '/usr/lib/backupninja',
   $usecolors = true,
-  $vservers = false
+  $vservers = false,
+  $manage_nagios = false,
 ) {
 
   # install client dependencies

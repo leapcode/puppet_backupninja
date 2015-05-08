@@ -55,6 +55,18 @@ You will want to use the following resource:
 
 Otherwise your backups may be duplicated!
 
+Changes to nagios integration
+-----------------------------
+
+The default nagios passive service name has changed from "backups" to
+"backups-${name}". If you want it to be automatically created on your
+nagios host, you will need to set $backupninja::manage_nagios to true.
+on the client.
+
+Use the following resource to remove the old "backups" passive service.
+
+    nagios::service { 'backups': ensure => absent }
+
 Getting started
 ---------------
 
