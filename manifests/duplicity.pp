@@ -88,8 +88,8 @@ define backupninja::duplicity( $order  = 90,
                                $backupkeydestname    = $backupninja::keydestname,
                                # options to backupninja server sandbox
                                $ssh_dir_manage       = true,
-                               $ssh_dir              = false,
-                               $authorized_keys_file = false,
+                               $ssh_dir              = "${destdir}/.ssh",
+                               $authorized_keys_file = 'authorized_keys',
                                $installuser          = true,
                                $backuptag            = false,
                                # key options

@@ -4,7 +4,7 @@
 define backupninja::rsync(
   $order = 90, $ensure = present,
   $user = false, $home = "/home/${user}-${name}", $host = false,
-  $ssh_dir_manage = true, $ssh_dir = false, $authorized_keys_file = false,
+  $ssh_dir_manage = true, $ssh_dir = "${home}/.ssh", $authorized_keys_file = 'authorized_keys',
   $installuser = true, $keymanage = $backupninja::keymanage, $key = false, $backuptag = false,
   $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore, $extras = false,
   $nagios_description = 'backups', $subfolder = 'rsync',
