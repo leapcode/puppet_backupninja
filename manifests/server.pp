@@ -8,7 +8,6 @@ define backupninja_server_realize($host) {
 class backupninja::server (
   $backupdir = '/backup',
   $backupdir_ensure = 'directory',
-  $backupserver_tag = $::fqdn,
   $manage_nagios = false,
   $nagios_server = undef
 ) {
@@ -51,7 +50,7 @@ class backupninja::server (
   }
 
   # collect all resources from hosted backups
-  Backupninja_server_realize <<| tag == "$backupserver_tag" |>>
+  Backupninja_server_realize <<| tag == $::fqdn |>>
 
   # this define allows nodes to declare a remote backup sandbox, that have to
   # get created on the server
