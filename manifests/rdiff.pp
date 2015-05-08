@@ -40,7 +40,7 @@ define backupninja::rdiff(
 
       backupninja::server::sandbox
       {
-        "${user}-${name}": user => $user, host => $fqdn, dir => $home,
+        "${user}-${name}": user => $user, host => $host, dir => $home,
         manage_ssh_dir => $ssh_dir_manage, ssh_dir => $ssh_dir, key => $key,
         authorized_keys_file => $authorized_keys_file, installuser => $installuser,
         backuptag => $backuptag, keytype => $backupkeytype, backupkeys => $backupkeystore,
