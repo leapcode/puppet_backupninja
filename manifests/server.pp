@@ -106,7 +106,7 @@ class backupninja::server (
             }
 	  }
 	  default: {
-              if !defined(Ssh_autorized_key["$real_user"]) {
+              if !defined(Ssh_autorized_key["$user"]) {
                 @@ssh_authorized_key{ "$user":
                   type    => $keytype,
                   key     => $key,
