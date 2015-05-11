@@ -15,20 +15,50 @@
 #      options should be given as arrays if you want to specify multiple
 #      directories.
 # 
-define backupninja::rdiff(
-  $order = 90, $ensure = present, 
-  $user = false, $home = "/home/${user}-${name}", $host = false,
-  $type = 'local',
-  $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
-               "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
-               "/home/*/gtk-gnutella-downloads" ],
-  $include = [ "/var/spool/cron/crontabs", "/var/backups", "/etc", "/root",
-               "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
-  $vsinclude = false, $keep = 30, $sshoptions = false, $options = '--force', $ssh_dir_manage = true,
-  $ssh_dir = "${home}/.ssh", $authorized_keys_file = 'authorized_keys', $installuser = true, $keymanage = $backupninja::keymanage, $key = false,
-  $backuptag = "backupninja-${::fqdn}", $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore,
-  $extras = false, $nagios_description = "backups-${name}")
-{
+define backupninja::rdiff( $order  = 90,
+                           $ensure = present,
+                           # [general]
+                           $options = '--force',
+                           $extras  = false,
+                           # [source]
+                           $include = [ "/var/spool/cron/crontabs",
+                                        "/var/backups",
+                                        "/etc",
+                                        "/root",
+                                        "/home",
+                                        "/usr/local/*bin",
+                                        "/var/lib/dpkg/status*"
+                                      ],
+                           $exclude = [ "/home/*/.gnupg",
+                                        "/home/*/.local/share/Trash",
+                                        "/home/*/.Trash",
+                                        "/home/*/.thumbnails",
+                                        "/home/*/.beagle",
+                                        "/home/*/.aMule",
+                                        "/home/*/gtk-gnutella-downloads"
+                                      ],
+                           $vsinclude = false,
+                           # [dest]
+                           $type       = 'local',
+                           $host       = false,
+                           $user       = false,
+                           $home       = "/home/${user}-${name}",
+                           $keep       = 30,
+                           $sshoptions = false,
+                           # ssh keypair config
+                           $key            = false,
+                           $keymanage      = $backupninja::keymanage,
+                           $backupkeystore = $backupninja::keystore,
+                           $backupkeytype  = $backupninja::keytype,
+                           $ssh_dir_manage = true,
+                           $ssh_dir        = "${home}/.ssh",
+                           $authorized_keys_file = 'authorized_keys',
+                           # sandbox config
+                           $installuser = true,
+                           $backuptag   = "backupninja-${::fqdn}",
+                           # monitoring
+                           $nagios_description = "backups-${name}" ) {
+
   # install client dependencies
   ensure_resource('package', 'rdiff-backup', {'ensure' => $backupninja::ensure_rdiffbackup_version})
 
@@ -38,32 +68,37 @@ define backupninja::rdiff(
     'remote': {
       case $host { false: { err("need to define a host for remote backups!") } }
 
-      backupninja::server::sandbox
-      {
-        "${user}-${name}": user => $user, host => $host, dir => $home,
-        manage_ssh_dir => $ssh_dir_manage, ssh_dir => $ssh_dir, key => $key,
-        authorized_keys_file => $authorized_keys_file, installuser => $installuser,
-        backuptag => $backuptag, keytype => $backupkeytype, backupkeys => $backupkeystore,
-        nagios_description => $nagios_description
+      backupninja::server::sandbox { "${user}-${name}":
+        user                 => $user,
+        host                 => $host,
+        dir                  => $home,
+        manage_ssh_dir       => $ssh_dir_manage,
+        ssh_dir              => $ssh_dir,
+        key                  => $key,
+        authorized_keys_file => $authorized_keys_file,
+        installuser          => $installuser,
+        backuptag            => $backuptag,
+        backupkeys           => $backupkeystore,
+        keytype              => $backupkeytype,
+        nagios_description   => $nagios_description
       }
      
-      backupninja::key
-      {
-        "${user}-${name}": user => $user,
+      backupninja::key { "${user}-${name}":
+        user      => $user,
         keymanage => $keymanage,
-        keytype => $backupkeytype,
-        keystore => $backupkeystore,
+        keytype   => $backupkeytype,
+        keystore  => $backupkeystore,
       }
     }
   }
 
 
   file { "${backupninja::configdir}/${order}_${name}.rdiff":
-    ensure => $ensure,
+    ensure  => $ensure,
     content => template('backupninja/rdiff.conf.erb'),
-    owner => root,
-    group => root,
-    mode => 0600,
+    owner   => root,
+    group   => root,
+    mode    => 0600,
     require => File["${backupninja::configdir}"]
   }
 }

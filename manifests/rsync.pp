@@ -1,35 +1,81 @@
 # Run rsync as part of a backupninja run.
 # Based on backupninja::rdiff
 
-define backupninja::rsync(
-  $order = 90, $ensure = present,
-  $user = false, $home = "/home/${user}-${name}", $host = false,
-  $ssh_dir_manage = true, $ssh_dir = "${home}/.ssh", $authorized_keys_file = 'authorized_keys',
-  $installuser = true, $keymanage = $backupninja::keymanage, $key = false, $backuptag = "backupninja-${::fqdn}",
-  $backupkeytype = $backupninja::keytype, $backupkeystore = $backupninja::keystore, $extras = false,
-  $nagios_description = "backups-${name}", $subfolder = 'rsync',
+define backupninja::rsync( $order  = 90,
+                           $ensure = present,
+                           # [general]
+                           $log             = false,
+                           $partition       = false,
+                           $fscheck         = false,
+                           $read_only       = false,
+                           $mountpoint      = false,
+                           $format          = false,
+                           $days            = false,
+                           $keepdaily       = false,
+                           $keepweekly      = false,
+                           $keepmonthly     = false,
+                           $lockfile        = false,
+                           $nicelevel       = 0,
+                           $tmp             = false,
+                           $multiconnection = false,
+                           $enable_mv_timestamp_bug = false,
+                           # [source]
+                           $include = [ "/var/spool/cron/crontabs",
+                                        "/var/backups",
+                                        "/etc",
+                                        "/root",
+                                        "/home",
+                                        "/usr/local/*bin",
+                                        "/var/lib/dpkg/status*"
+                                      ],
+                           $exclude = [ "/home/*/.gnupg",
+                                        "/home/*/.local/share/Trash",
+                                        "/home/*/.Trash",
+                                        "/home/*/.thumbnails",
+                                        "/home/*/.beagle",
+                                        "/home/*/.aMule",
+                                        "/home/*/gtk-gnutella-downloads"
+                                      ],
+                           # [dest]
+                           $host           = false,
+                           $user           = false,
+                           $home           = "/home/${user}-${name}",
+                           $subfolder      = 'rsync',
+                           $testconnect    = false,
+                           $ssh            = false,
+                           $protocol       = false,
+                           $numericids     = false,
+                           $compress       = false,
+                           $port           = false,
+                           $bandwidthlimit = false,
+                           $remote_rsync   = false,
+                           $batch          = false,
+                           $batchbase      = false,
+                           $fakesuper      = false,
+                           $id_file        = false,
+                           # [services]
+                           $initscripts = false,
+                           $service     = false,
+                           # [system]
+                           $rm    = false,
+                           $cp    = false,
+                           $touch = false,
+                           $mv    = false,
+                           $fsck  = false,
+                           # ssh keypair config
+                           $key                  = false,
+                           $keymanage            = $backupninja::keymanage,
+                           $backupkeystore       = $backupninja::keystore,
+                           $backupkeytype        = $backupninja::keytype,
+                           $ssh_dir_manage       = true,
+                           $ssh_dir              = "${home}/.ssh",
+                           $authorized_keys_file = 'authorized_keys',
+                           # sandbox config
+                           $installuser = true,
+                           $backuptag   = "backupninja-${::fqdn}",
+                           # monitoring
+                           $nagios_description = "backups-${name}" ) {
 
-  $log = false, $partition = false, $fscheck = false, $read_only = false,
-  $mountpoint = false, $backupdir = false, $format = false, $days = false,
-  $keepdaily = false, $keepweekly = false, $keepmonthly = false, $lockfile = false,
-  $nicelevel = 0, $enable_mv_timestamp_bug = false, $tmp = false, $multiconnection = false,
-
-  $exclude_vserver = false,
-  $exclude = [ "/home/*/.gnupg", "/home/*/.local/share/Trash", "/home/*/.Trash",
-               "/home/*/.thumbnails", "/home/*/.beagle", "/home/*/.aMule",
-               "/home/*/gtk-gnutella-downloads" ],
-  $include = [ "/var/spool/cron/crontabs", "/var/backups", "/etc", "/root",
-               "/home", "/usr/local/*bin", "/var/lib/dpkg/status*" ],
-
-  $testconnect = false, $protocol = false, $ssh = false, $port = false,
-  $bandwidthlimit = false, $remote_rsync = false, $id_file = false,
-  $batch = false, $batchbase = false, $numericids = false, $compress = false,
-  $fakesuper = false,
-
-  $initscripts = false, $service = false,
-
-  $rm = false, $cp = false, $touch = false, $mv = false, $fsck = false)
-{
   # install client dependencies
   ensure_resource('package', 'rsync', {'ensure' => $backupninja::ensure_rsync_version})
 
@@ -55,7 +101,7 @@ define backupninja::rsync(
         backuptag            => $backuptag,
         keytype              => $backupkeytype,
         backupkeys           => $backupkeystore,
-        nagios_description  => $nagios_description
+        nagios_description   => $nagios_description
       }
      
       backupninja::key { "${user}-${name}":
