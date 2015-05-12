@@ -41,7 +41,7 @@ class backupninja::server (
     }
 
     cron { checkbackups:
-      command => "/usr/local/bin/checkbackups -d ${backupdir} -s ${nagios_server} -w ${nagios_warn_level} -c ${nagios_crit_level} | grep -v 'sent to host successfully",
+      command => "/usr/local/bin/checkbackups -d ${backupdir} -s ${nagios_server} -w ${nagios_warn_level} -c ${nagios_crit_level} | grep -v 'sent to host successfully'",
       user => "root",
       hour => "8-23",
       minute => 59,
