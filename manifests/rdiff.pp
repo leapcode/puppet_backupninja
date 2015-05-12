@@ -80,7 +80,6 @@ define backupninja::rdiff( $order  = 90,
         backuptag            => $backuptag,
         backupkeys           => $backupkeystore,
         keytype              => $backupkeytype,
-        nagios_description   => $nagios_description
       }
      
       backupninja::key { "${user}-${name}":
@@ -101,5 +100,10 @@ define backupninja::rdiff( $order  = 90,
     mode    => 0600,
     require => File["${backupninja::configdir}"]
   }
+
+  if $backupninja::manage_nagios {
+    nagios::service::passive { $nagios_description: }
+  }
+
 }
   

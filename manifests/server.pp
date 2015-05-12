@@ -68,14 +68,8 @@ class backupninja::server (
     $uid = false,
     $gid = "backupninjas",
     $backuptag = "backupninja-${::fqdn}",
-    $nagios_description = 'backups'
   ) {
 
-    if $backupninja::manage_nagios {
-      # configure a passive service check for backups
-      nagios::service::passive { $nagios_description: }
-    }
-    
     if !defined(Backupninja_server_realize["${::fqdn}@${host}"]) {
       @@backupninja_server_realize { "${::fqdn}@${host}":
         host => $::fqdn,

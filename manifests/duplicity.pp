@@ -138,5 +138,10 @@ define backupninja::duplicity( $order  = 90,
     mode    => 0600,
     require => File["${backupninja::configdir}"]
   }
+
+  if $backupninja::manage_nagios {
+    nagios::service::passive { $nagios_description: }
+  }
+
 }
 
